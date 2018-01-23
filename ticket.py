@@ -220,14 +220,13 @@ class Notes:
 # Parse command-line arguments
 
 parser = argparse.ArgumentParser()
-action = parser.add_mutually_exclusive_group(required=False)
-action.add_argument('-l' , '--list'     , help="list tickets"                   , action='store_true')
-action.add_argument('-k' , '--list-all' , help="list tickets, including archive", action='store_true')
-action.add_argument('-a' , '--archive'  , help="move tickets to archive"        , action='store_true')
-action.add_argument('-u' , '--unarchive', help="move tickets from archive"      , action='store_true')
-action.add_argument('-o' , '--open'     , help="open existing tickets only"     , action='store_true')
-action.add_argument('-d' , '--delete'   , help="delete tickets"                 , action='store_true')
-action.add_argument('-s' , '--status'   , help="set the status"                 , nargs=1)
+parser.add_argument('-l' , '--list'     , help="list tickets"                   , action='store_true')
+parser.add_argument('-k' , '--list-all' , help="list tickets, including archive", action='store_true')
+parser.add_argument('-a' , '--archive'  , help="move tickets to archive"        , action='store_true')
+parser.add_argument('-u' , '--unarchive', help="move tickets from archive"      , action='store_true')
+parser.add_argument('-o' , '--open'     , help="open existing tickets only"     , action='store_true')
+parser.add_argument('-d' , '--delete'   , help="delete tickets"                 , action='store_true')
+parser.add_argument('-s' , '--status'   , help="set the status"                 , nargs=1)
 parser.add_argument('ticket'            , help="the ticket ID(s) to open/change", type=Ticket, nargs='*')
 parser.set_defaults(action='create_tickets')
 args = parser.parse_args()
@@ -244,35 +243,40 @@ if args.list or args.list_all:
     for ticket in sorted(found):
         print(ticket)
 
-elif args.archive:
-    for ticket in args.ticket:
-        ticket.archive()
+elif args.ticket:
 
-elif args.unarchive:
-    for ticket in args.ticket:
-        ticket.unarchive()
+    if args.archive and args.unarchive:
+        print('Conflicting arguments: -a/--archive, -u/--unarchive')
+        sys.exit(1)
 
-elif args.open:
-    for ticket in args.ticket:
-        ticket.open()
+    no_action = not any(v for k, v in args.__dict__.items() if k != 'ticket')
 
-elif args.delete:
     for ticket in args.ticket:
-        confirm = None
-        while confirm not in 'YyNn':
-            confirm = input('Are you sure you want to delete {}? (y/N): '.format(ticket.id)) or 'N';
+
+        if args.status:
+            ticket.status = args.status[0]
+
+        if args.archive:
+            ticket.archive()
+
+        if args.unarchive:
+            ticket.unarchive()
+
+        if args.open:
+            ticket.open()
+
+        if args.delete:
+            prompt = 'Are you sure you want to delete {}? (y/N): '.format(ticket.id)
+            confirm = None
+            while confirm not in 'YyNn':
+                confirm = input(prompt) or 'N'
             if confirm in 'Yy':
                 ticket.delete()
 
-elif args.status:
-    for ticket in args.ticket:
-        ticket.status = args.status[0]
-
-elif args.ticket:
-    for ticket in args.ticket:
-        if ticket.state is None:
-            ticket.create()
-        ticket.open()
+        if no_action:
+            if ticket.state is None:
+                ticket.create()
+            ticket.open()
 
 else:
     parser.print_help()
