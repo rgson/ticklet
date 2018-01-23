@@ -239,13 +239,8 @@ for state in {State.active, State.archived}:
 
 # Run command
 
-if args.list:
-    found = Ticket.get_tickets()
-    for ticket in sorted(found):
-        print(ticket)
-
-elif args.list_all:
-    found = Ticket.get_tickets(include_archived=True)
+if args.list or args.list_all:
+    found = Ticket.get_tickets(include_archived=args.list_all)
     for ticket in sorted(found):
         print(ticket)
 
@@ -264,9 +259,9 @@ elif args.open:
 elif args.delete:
     for ticket in args.ticket:
         confirm = None
-        while confirm not in set('YyNn'):
+        while confirm not in 'YyNn':
             confirm = input('Are you sure you want to delete {}? (y/N): '.format(ticket.id)) or 'N';
-            if confirm in set('Yy'):
+            if confirm in 'Yy':
                 ticket.delete()
 
 elif args.status:
