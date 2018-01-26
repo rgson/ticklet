@@ -23,6 +23,7 @@ parser.add_argument('-u' , '--unarchive', help='move tickets from archive'      
 parser.add_argument('-o' , '--open'     , help='open existing tickets only'     , action='store_true')
 parser.add_argument('-d' , '--delete'   , help='delete tickets'                 , action='store_true')
 parser.add_argument('-s' , '--status'   , help='set the status'                                      )
+parser.add_argument('-m' , '--summary'  , help='set the summary'                                     )
 parser.add_argument('ticket'            , help='the ticket ID(s) to open/change', nargs='*'          )
 args = parser.parse_args()
 
@@ -75,6 +76,9 @@ else:
 
         if args.status is not None:
             notes.write(notes.read(t)._replace(status=args.status))
+
+        if args.summary is not None:
+            notes.write(notes.read(t)._replace(summary=args.summary))
 
         if args.archive:
             t = ticket.archive(t)
