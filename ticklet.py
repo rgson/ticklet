@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-##################################################################################
 
 import argparse
 import collections
@@ -29,8 +28,6 @@ import sys
 import textwrap
 import yaml
 
-##################################################################################
-# Definitions
 
 class TicketNotFound(Exception):
     pass
@@ -241,11 +238,10 @@ class Config():
         return c
 
 ##################################################################################
-# Script
 
 config = Config.load()
 
-for k, directory in config['directory'].items():
+for directory in config['directory'].values():
     os.makedirs(directory, exist_ok=True)
 
 # Parse command-line arguments
@@ -276,7 +272,7 @@ for conflicts in conflicting_arguments:
 
 # Default to creating and opening tickets
 
-no_action = sum(bool(v) for k, v in args.__dict__.items() if k != 'ticket') < 1
+no_action = not any(v for k, v in args.__dict__.items() if k != 'ticket')
 args.create = no_action
 args.open |= no_action
 
@@ -295,7 +291,7 @@ elif not args.ticket:
     sys.exit(1)
 
 else:
-    error = False
+    missing_tickets = False
 
     for ticket_id in args.ticket:
         try:
@@ -305,7 +301,7 @@ else:
                 t = Ticket.create(ticket_id)
             else:
                 print('Ticket not found:', e, file=sys.stderr)
-                error = True
+                missing_tickets = True
                 continue
 
         if args.status is not None:
@@ -329,5 +325,5 @@ else:
             if confirm in 'Yy':
                 Ticket.delete(t)
 
-    if error:
-        sys.exit(1)
+    if missing_tickets:
+        sys.exit(2)
