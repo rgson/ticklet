@@ -3,10 +3,23 @@
 A command-line tool for ticket management (the bug tracker kind).
 Keeps track of tickets, including status, affected files and related notes.
 
-## Getting started
+## Usage
 
-1. Place `ticklet.py` somewhere in your `$PATH`, e.g. in `~/bin`.
-2. Run `ticklet.py -h` for usage information.
+Run `ticklet -h` for up-to-date usage instructions.
+
+## Installation
+
+1. Copy `ticklet.py` (ideally without the `.py` extension) to somewhere in your `$PATH`, e.g. `/usr/local/bin`.
+2. Ensure that the file is executable (`755`).
+3. Install the [dependencies](#Dependencies).
+
+*Example:*
+
+```sh
+# Debian 9 (Stretch)
+sudo install -m 0755 -o root ticklet.py /usr/local/bin/ticklet
+sudo apt install python3 python3-yaml
+```
 
 ## Dependencies
 
