@@ -1,0 +1,22 @@
+ticklet (2.1) unstable; urgency=low
+
+  * Support per-user configuration
+
+ -- Robin Gustafsson <robin@rgson.se>  Sun, 04 Mar 2018 00:24:20 +0100
+
+ticklet (2.0) unstable; urgency=medium
+
+  * Refactor -l, -k and -d arguments
+  * Allow multiple actions with a single command
+  * Refactor/rewrite program
+  * Add -m/--summary argument
+  * Use classes instead of modules
+  * Rename the tool to something more unique
+
+ -- Robin Gustafsson <robin@rgson.se>  Sun, 04 Mar 2018 00:22:19 +0100
+
+ticklet (1.0) unstable; urgency=medium
+
+  * Initial commit.
+
+ -- Robin Gustafsson <robin@rgson.se>  Sun, 04 Mar 2018 00:18:44 +0100
