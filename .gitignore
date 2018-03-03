@@ -1,7 +1,6 @@
-__pycache__
-.vagrant
-/build
-/dist
-*.egg-info
 .pybuild
+.vagrant
+*.egg-info
+/build
 /debian
+/dist
