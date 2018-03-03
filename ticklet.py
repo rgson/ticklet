@@ -9,28 +9,8 @@ import os
 import shutil
 import subprocess
 import sys
-
-##################################################################################
-# Constants
-
-DIR_ACTIVE  = os.path.expanduser('~') + '/tickets/active'
-DIR_ARCHIVE = os.path.expanduser('~') + '/tickets/archive'
-
-NOTES_TEMPLATE = ("""\
-# Ticket {id}
-
-_Summary_:
-_Status_ : New
-
-
-## Files
-
--
-
-
-## Notes
-
-""")
+import textwrap
+import yaml
 
 ##################################################################################
 # Definitions
@@ -41,12 +21,12 @@ class TicketNotFound(Exception):
 class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @staticmethod
-    def _path(id, directory=DIR_ACTIVE):
+    def _path(id, directory):
         return '{}/{}'.format(directory, id)
 
     @classmethod
     def find(cls, id, optional=False):
-        directories = (DIR_ACTIVE, DIR_ARCHIVE)
+        directories = (config['directory.active'], config['directory.archive'])
         paths = (cls._path(id, directory) for directory in directories)
         found = next((path for path in paths if os.path.exists(path)), None)
         if not found and not optional:
@@ -55,7 +35,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def create(cls, id):
-        path = cls._path(id)
+        path = cls._path(id, config['directory.active'])
         os.makedirs(path)
         ticket = cls(id=id, path=path)
         Notes.create(ticket)
@@ -66,9 +46,9 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def list(cls, include_archived=False):
-        yield from cls._list_tickets_in(DIR_ACTIVE)
+        yield from cls._list_tickets_in(config['directory.active'])
         if include_archived:
-            yield from cls._list_tickets_in(DIR_ARCHIVE)
+            yield from cls._list_tickets_in(config['directory.archive'])
 
     @classmethod
     def _list_tickets_in(cls, directory):
@@ -76,15 +56,14 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
             yield cls(id=d[len(directory)+1:-1], path=d[:-1])
 
     def __str__(self):
-        n = Notes.read(self)
-        return ('{:10}  {:25.25}  {}'.format(self.id, n.summary, n.status) if n
-                else self.id)
+        n = Notes.read(self) or Notes(['']*4)
+        return '{:10}  {:25.25}  {}'.format(self.id, n.summary, n.status)
 
     def archive(self):
-        return self._move_ticket(DIR_ARCHIVE)
+        return self._move_ticket(config['directory.archive'])
 
     def unarchive(self):
-        return self._move_ticket(DIR_ACTIVE)
+        return self._move_ticket(config['directory.active'])
 
     def _move_ticket(self, target_dir):
         target_path = Ticket._path(self.id, target_dir)
@@ -114,14 +93,14 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
     def create(cls, ticket):
         path = Notes._path(ticket)
         with open(path, 'w') as f:
-            print(NOTES_TEMPLATE.format(id=ticket.id), file=f)
+            print(config['template'].format(id=ticket.id), file=f)
         return cls(path=path, summary='', status='New', files=[])
 
     @classmethod
     def read(cls, ticket):
         try:
             path = Notes._path(ticket)
-            summary = status = None
+            summary = status = ''
             files, files_section = [], False
             with open(path, 'r') as f:
                 for line in f:
@@ -189,13 +168,68 @@ class External:
         except FileNotFoundError:
             return None
 
+class Config():
+
+    def __init__(self, conf):
+        self.conf = conf
+
+    def __getitem__(self, key):
+        v = self.conf
+        for part in key.split('.'):
+            v = v[part]
+        return v
+
+    def update(self, conf):
+        def merge_dicts(a, b):
+            for k in b:
+                if k in a and isinstance(a[k], dict) and isinstance(b[k], dict):
+                    merge_dicts(a[k], b[k])
+                else:
+                    a[k] = b[k]
+        merge_dicts(self.conf, conf)
+
+    @classmethod
+    def load(cls):
+        c = cls({
+            'directory': {
+                'active': os.path.expanduser('~/tickets/active'),
+                'archive': os.path.expanduser('~/tickets/archive'),
+            },
+            'template': textwrap.dedent("""\
+                # Ticket {id}
+
+                _Summary_:
+                _Status_ : New
+
+
+                ## Files
+
+                -
+
+
+                ## Notes
+
+                """),
+        })
+
+        user_config_dir = os.environ.get('XDG_CONFIG_HOME',
+            os.path.expanduser('~/.config'))
+        user_config_file = user_config_dir + '/ticklet.yaml'
+        try:
+            with open(user_config_file) as f:
+                c.update(yaml.load(f))
+        except FileNotFoundError:
+            pass
+
+        return c
+
 ##################################################################################
 # Script
 
-# Create active and archive directories
+config = Config.load()
 
-for d in [DIR_ACTIVE, DIR_ARCHIVE]:
-    os.makedirs(d, exist_ok=True)
+for k, directory in config['directory'].items():
+    os.makedirs(directory, exist_ok=True)
 
 # Parse command-line arguments
 
