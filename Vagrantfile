@@ -11,7 +11,11 @@ def setup
   <<~HEREDOC
 
     apt install -y \
+      devscripts \
+      equivs \
+      fakeroot \
       git \
+      git-buildpackage \
       python3-setuptools \
       python3-yaml \
       ;
