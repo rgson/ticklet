@@ -1,0 +1,30 @@
+language: python
+
+sudo: enabled
+dist: trusty
+
+python:
+  - 3.4
+  - 3.5
+  - 3.6
+
+script: make test
+
+jobs:
+  include:
+
+    - stage: setuptools
+      script: make sdist bdist && ./setup.py install
+
+    - stage: debian
+      install: >
+        sudo apt-get install -yq --no-install-suggests --no-install-recommends
+        devscripts fakeroot equivs git-buildpackage &&
+        mk-build-deps -i -s sudo -t 'apt-get -yq' debian/control
+      script: make deb && sudo dpkg -i ../*.deb
+      python: 3.4
+      virtualenv:
+        system_site_packages: true
+
+notifications:
+  email: false
