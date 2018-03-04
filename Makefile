@@ -11,7 +11,7 @@ clean:
 
 .PHONY: test
 test:
-	@for test in test/*; do ./"$$test"; done
+	@for test in test/*; do ./"$$test" || exit $$?; done
 
 .PHONY: sdist
 sdist: ticklet.py setup.py
