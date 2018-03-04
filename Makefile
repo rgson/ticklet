@@ -4,7 +4,7 @@
 all: clean test sdist bdist deb
 
 .PHONY: clean
-clean:
+clean: clean-debian/changelog
 	debuild clean
 	python3 setup.py clean
 	rm -rf build dist *.egg-info
@@ -26,7 +26,10 @@ deb: ticklet.py debian/changelog
 	debuild -us -uc
 
 .PHONY: debian/changelog
-debian/changelog:
-	sed -ri '/UNRELEASED/d; /^ticklet ([\d.-]*)/,$$!d' debian/changelog
+debian/changelog: clean-debian/changelog
 	gbp dch -a --debian-tag 'v%(version)s' -N $$(./setup.py -V)-1 \
 		--urgency low --ignore-branch
+
+.PHONY: clean-debian/changelog
+clean-debian/changelog:
+	sed -ri '/UNRELEASED/d; /^ticklet ([\d.-]*)/,$$!d' debian/changelog
