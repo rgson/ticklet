@@ -5,7 +5,28 @@ Keeps track of tickets, including status, affected files and related notes.
 
 ## Usage
 
-Run `ticklet -h` for up-to-date usage instructions.
+Run `ticklet -h` for usage instructions:
+
+```
+usage: ticklet [-h] [-l] [-k] [-a] [-u] [-o] [-d] [-s STATUS] [-m SUMMARY]
+               [ticket [ticket ...]]
+
+positional arguments:
+  ticket                the ticket ID(s) to open/change
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l, --list            list tickets
+  -k, --list-all        list tickets, including archive
+  -a, --archive         move tickets to archive
+  -u, --unarchive       move tickets from archive
+  -o, --open            open existing tickets only
+  -d, --delete          delete tickets
+  -s STATUS, --status STATUS
+                        set the status
+  -m SUMMARY, --summary SUMMARY
+                        set the summary
+```
 
 ## Installation
 
