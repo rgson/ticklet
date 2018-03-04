@@ -28,4 +28,5 @@ deb: ticklet.py debian/changelog
 .PHONY: debian/changelog
 debian/changelog:
 	sed -ri '/UNRELEASED/d; /^ticklet ([\d.-]*)/,$$!d' debian/changelog
-	gbp dch -a --debian-tag 'v%(version)s' -N $$(./setup.py -V)-1 --urgency low
+	gbp dch -a --debian-tag 'v%(version)s' -N $$(./setup.py -V)-1 \
+		--urgency low --ignore-branch
