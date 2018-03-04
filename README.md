@@ -30,29 +30,37 @@ optional arguments:
 
 ## Installation
 
-### Manual
+### Automatic (with `.deb` package)
 
-1. Copy `ticklet.py` (ideally without the `.py` extension) to somewhere in your `$PATH`, e.g. `/usr/local/bin`.
-2. Ensure that the file is executable (`755`).
-3. Install the [dependencies](#Dependencies).
-
-*Example:*
+This is the recommended approach on Debian-based systems.
 
 ```sh
 # Debian 9 (Stretch)
-sudo install -m 0755 -o root ticklet.py /usr/local/bin/ticklet
-sudo apt install python3 python3-yaml
+make deb
+sudo dpkg -i ../ticklet_*.deb
 ```
 
 ### Automatic (with `setuptools`)
 
 1. Install the [dependencies](#Dependencies).
-2. Build and install using `setup.py`.
+2. Build and install `ticklet` using `setup.py`.
 
 ```sh
 # Debian 9 (Stretch)
-sudo apt install git python3-setuptools python3-yaml
+sudo apt install python3 python3-yaml python3-setuptools
 sudo ./setup.py install
+```
+
+### Manual
+
+1. Copy `ticklet.py` (ideally without the `.py` extension) to somewhere in your `$PATH`, e.g. `/usr/bin`.
+2. Ensure that the file is executable (`755`).
+3. Install the [dependencies](#Dependencies).
+
+```sh
+# Debian 9 (Stretch)
+sudo install -m 0755 -o root ticklet.py /usr/bin/ticklet
+sudo apt install python3 python3-yaml
 ```
 
 ## Dependencies
@@ -62,11 +70,10 @@ sudo ./setup.py install
 
 ## Configuration
 
-Some of `ticklet`s behavior can be configured through `~/.config/ticklet.yaml`.
-
-*Example:*
+Some of `ticklet`'s behavior can be configured through `~/.config/ticklet.yaml`.
 
 ```yaml
+# Example config showing the default settings
 ---
 directory:
   active: /home/yourname/tickets/active
