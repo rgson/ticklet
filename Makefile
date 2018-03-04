@@ -1,13 +1,17 @@
 #!/usr/bin/make -f
 
 .PHONY: all
-all: clean sdist bdist deb
+all: clean test sdist bdist deb
 
 .PHONY: clean
 clean:
 	debuild clean
 	python3 setup.py clean
 	rm -rf build dist *.egg-info
+
+.PHONY: test
+test:
+	@for test in test/*; do ./"$$test"; done
 
 .PHONY: sdist
 sdist: ticklet.py setup.py
