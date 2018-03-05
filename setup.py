@@ -15,9 +15,15 @@ try:
     v, *dev = p.stdout.readlines()[0].strip().decode('utf-8')[1:].split('-')
     formats = ['{}', '{}.dev0+{}', '{}.dev{}+{}', '{}.dev{}+{}.{}']
     version = formats[len(dev)].format(v, *dev)
+    with open('ticklet/VERSION', 'w') as f:
+        print(version, file=f)
 except:
-    print('Error: failed to find version', file=sys.stderr)
-    sys.exit(1)
+    try:
+        with open('ticklet/VERSION', 'r') as f:
+            version = f.readlines()[0].strip()
+    except:
+        print('Error: failed to find version', file=sys.stderr)
+        sys.exit(1)
 
 
 # Dependencies
@@ -38,6 +44,7 @@ setuptools.setup(
     download_url='https://github.com/rgson/ticklet/tarball/' + version,
     packages=setuptools.find_packages(),
     entry_points={'console_scripts': ['ticklet = ticklet.cli:run']},
+    package_data={'': ['VERSION']},
     install_requires=requirements,
     platforms=['Linux'],
     classifiers=[
