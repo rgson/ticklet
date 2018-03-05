@@ -4,6 +4,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/debian-9.3"
   config.vm.synced_folder ".", "/vagrant"
+  config.vm.synced_folder ".", "/home/vagrant/vagrant"
   config.vm.provision "shell", inline: setup
 end
 
@@ -19,6 +20,8 @@ def setup
       python3-setuptools \
       python3-yaml \
       ;
+
+    mk-build-deps -i -s sudo -t 'apt -y' /vagrant/debian/control
 
   HEREDOC
 end
