@@ -1,36 +1,33 @@
-#!/usr/bin/env python3
-
 # (c) 2018, Robin Gustafsson <robin@rgson.se>
 #
-# This program is free software: you can redistribute it and/or modify
+# This file is part of Ticklet.
+#
+# Ticklet is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful,
+# Ticklet is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with Ticklet.  If not, see <http://www.gnu.org/licenses/>.
 
-
-import argparse
 import collections
 import fileinput
 import glob
-import operator
 import os
 import shutil
 import subprocess
-import sys
-import textwrap
-import yaml
+
+from .config import config
 
 
 class TicketNotFound(Exception):
     pass
+
 
 class Ticket(collections.namedtuple('Ticket', 'id path')):
 
@@ -97,6 +94,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         External.open_nemo(directories)
         External.open_gnome_terminal(directories)
 
+
 class Notes(collections.namedtuple('Notes', 'path summary status files')):
 
     @staticmethod
@@ -151,6 +149,7 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                     files_section = False
                 print(line, end='')
 
+
 class External:
 
     @staticmethod
@@ -181,149 +180,3 @@ class External:
             return p.stdout.decode('utf-8').strip() or None
         except FileNotFoundError:
             return None
-
-class Config():
-
-    def __init__(self, conf):
-        self.conf = conf
-
-    def __getitem__(self, key):
-        v = self.conf
-        for part in key.split('.'):
-            v = v[part]
-        return v
-
-    def update(self, conf):
-        def merge_dicts(a, b):
-            for k in b:
-                if k in a and isinstance(a[k], dict) and isinstance(b[k], dict):
-                    merge_dicts(a[k], b[k])
-                else:
-                    a[k] = b[k]
-        merge_dicts(self.conf, conf)
-
-    @classmethod
-    def load(cls):
-        c = cls({
-            'directory': {
-                'active': os.path.expanduser('~/tickets/active'),
-                'archive': os.path.expanduser('~/tickets/archive'),
-            },
-            'template': textwrap.dedent("""\
-                # Ticket {id}
-
-                _Summary_:
-                _Status_ : New
-
-
-                ## Files
-
-                -
-
-
-                ## Notes
-
-                """),
-        })
-
-        user_config_dir = os.environ.get('XDG_CONFIG_HOME',
-            os.path.expanduser('~/.config'))
-        user_config_file = user_config_dir + '/ticklet.yaml'
-        try:
-            with open(user_config_file) as f:
-                c.update(yaml.load(f))
-        except FileNotFoundError:
-            pass
-
-        return c
-
-##################################################################################
-
-config = Config.load()
-
-for directory in config['directory'].values():
-    os.makedirs(directory, exist_ok=True)
-
-# Parse command-line arguments
-
-parser = argparse.ArgumentParser()
-parser.add_argument('-l' , '--list'     , help='list tickets'                   , action='store_true')
-parser.add_argument('-k' , '--list-all' , help='list tickets, including archive', action='store_true')
-parser.add_argument('-a' , '--archive'  , help='move tickets to archive'        , action='store_true')
-parser.add_argument('-u' , '--unarchive', help='move tickets from archive'      , action='store_true')
-parser.add_argument('-o' , '--open'     , help='open existing tickets only'     , action='store_true')
-parser.add_argument('-d' , '--delete'   , help='delete tickets'                 , action='store_true')
-parser.add_argument('-s' , '--status'   , help='set the status'                                      )
-parser.add_argument('-m' , '--summary'  , help='set the summary'                                     )
-parser.add_argument('ticket'            , help='the ticket ID(s) to open/change', nargs='*'          )
-args = parser.parse_args()
-
-# Check for conflicting arguments
-
-conflicting_arguments = [
-    {'-a/--archive': args.archive, '-u/--unarchive': args.unarchive},
-    {'-d/--delete' : args.delete , '-o/--open'     : args.open     }]
-
-for conflicts in conflicting_arguments:
-    if sum(conflicts.values()) > 1:
-        names = [k for k, v in conflicts.items() if v]
-        print('Conflicting options:', ', '.join(names), file=sys.stderr)
-        sys.exit(1)
-
-# Default to creating and opening tickets
-
-no_action = not any(v for k, v in args.__dict__.items() if k != 'ticket')
-args.create = no_action
-args.open |= no_action
-
-# Perform requested actions
-
-if no_action and not args.ticket:
-    parser.print_help()
-
-if args.list or args.list_all:
-    tickets = Ticket.list(include_archived=args.list_all)
-    tickets = sorted(tickets, key=operator.attrgetter('id'))
-    print('\n'.join(str(t) for t in tickets))
-
-elif not args.ticket:
-    print('No tickets specified for action', file=sys.stderr)
-    sys.exit(1)
-
-else:
-    missing_tickets = False
-
-    for ticket_id in args.ticket:
-        try:
-            t = Ticket.find(ticket_id)
-        except TicketNotFound as e:
-            if args.create:
-                t = Ticket.create(ticket_id)
-            else:
-                print('Ticket not found:', e, file=sys.stderr)
-                missing_tickets = True
-                continue
-
-        if args.status is not None:
-            Notes.write(Notes.read(t)._replace(status=args.status))
-
-        if args.summary is not None:
-            Notes.write(Notes.read(t)._replace(summary=args.summary))
-
-        if args.archive:
-            t = Ticket.archive(t)
-        elif args.unarchive:
-            t = Ticket.unarchive(t)
-
-        if args.open:
-            Ticket.open(t)
-        elif args.delete:
-            prompt = 'Are you sure you want to delete {}? (y/N): '.format(t.id)
-            confirm = '-'
-            while confirm not in 'YyNn':
-                confirm = input(prompt) or 'N'
-            if confirm in 'Yy':
-                Ticket.delete(t)
-
-    if missing_tickets:
-        sys.exit(2)

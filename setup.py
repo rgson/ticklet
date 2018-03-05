@@ -25,16 +25,6 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 
-# Scripts
-scripts = []
-rename_scripts = {'ticklet.py': 'ticklet'}
-build_bin = 'build/_bin'
-os.makedirs(build_bin, exist_ok=True)
-for old, new in rename_scripts.items():
-    scripts.append(os.path.join(build_bin, new))
-    shutil.copyfile(old, scripts[-1])
-
-
 setuptools.setup(
     name='ticklet',
     version=version,
@@ -46,7 +36,8 @@ setuptools.setup(
     keywords=['ticket', 'notes', 'cli'],
     url='https://github.com/rgson/ticket-tool',
     download_url='https://github.com/rgson/ticklet/tarball/' + version,
-    scripts=scripts,
+    packages=setuptools.find_packages(),
+    entry_points={'console_scripts': ['ticklet = ticklet.cli:run']},
     install_requires=requirements,
     platforms=['Linux'],
     classifiers=[
