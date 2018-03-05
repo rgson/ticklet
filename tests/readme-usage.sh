@@ -2,14 +2,10 @@
 
 me=$(basename $0)
 fail() { echo "$me: fail: $1" >&2; exit 1; }
-
-t=$(mktemp -d)
-trap "{ rm -r $t; }" EXIT
-
-cp ticklet.py "$t/ticklet"
+ticklet='/usr/bin/env python3 -m ticklet'
 
 diff \
-	<("$t/ticklet" -h) \
+	<($ticklet -h) \
 	<(sed '/## Usage/,/## Installation/!d' README.md |
 		sed '/```/,/```/!d' | sed '1d;$d') \
 	|| fail 'Outdated usage instructions in README'

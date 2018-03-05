@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+srcs := $(shell find ticklet/ -name '*.py')
+
 .PHONY: all
 all: clean test sdist bdist deb
 
@@ -14,15 +16,15 @@ test:
 	@for test in tests/*; do ./"$$test" || exit $$?; done
 
 .PHONY: sdist
-sdist: ticklet.py setup.py
+sdist: setup.py $(srcs)
 	python3 setup.py sdist
 
 .PHONY: bdist
-bdist: ticklet.py setup.py
+bdist: setup.py $(srcs)
 	python3 setup.py bdist
 
 .PHONY: deb
-deb: ticklet.py debian/changelog
+deb: debian/changelog $(srcs)
 	debuild -us -uc -I -I'.vagrant' -I'*.egg-info' -I'dist'
 
 .PHONY: debian/changelog
