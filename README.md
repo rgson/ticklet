@@ -8,7 +8,8 @@ Keeps track of tickets, including status, affected files and related notes.
 Run `ticklet -h` for usage instructions:
 
 ```
-usage: ticklet [-h] [-l] [-k] [-a] [-u] [-o] [-d] [-s STATUS] [-m SUMMARY]
+usage: ticklet [-h] [--version] [-l] [-k] [-a] [-u] [-o] [-d] [-s STATUS]
+               [-m SUMMARY]
                [ticket [ticket ...]]
 
 positional arguments:
@@ -16,6 +17,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  --version             output version info and exit
   -l, --list            list tickets
   -k, --list-all        list tickets, including archive
   -a, --archive         move tickets to archive
