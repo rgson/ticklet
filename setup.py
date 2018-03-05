@@ -39,6 +39,7 @@ setuptools.setup(
     name='ticklet',
     version=version,
     description='A command-line tool for ticket management (the bug tracker kind)',
+    long_description=open('README.md').read(),
     license='GPLv3+',
     author='Robin Gustafsson',
     author_email='robin@rgson.se',
@@ -47,6 +48,7 @@ setuptools.setup(
     download_url='https://github.com/rgson/ticklet/tarball/' + version,
     scripts=scripts,
     install_requires=requirements,
+    platforms=['Linux'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
