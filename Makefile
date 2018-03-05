@@ -5,7 +5,7 @@ all: clean test sdist bdist deb
 
 .PHONY: clean
 clean: clean-debian/changelog
-	debuild clean
+	dpkg-buildpackage -rfakeroot -Tclean
 	python3 setup.py clean
 	rm -rf build dist *.egg-info
 
