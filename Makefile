@@ -11,7 +11,7 @@ clean: clean-debian/changelog
 
 .PHONY: test
 test:
-	@for test in test/*; do ./"$$test" || exit $$?; done
+	@for test in tests/*; do ./"$$test" || exit $$?; done
 
 .PHONY: sdist
 sdist: ticklet.py setup.py
