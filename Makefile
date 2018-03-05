@@ -23,7 +23,7 @@ bdist: ticklet.py setup.py
 
 .PHONY: deb
 deb: ticklet.py debian/changelog
-	debuild -us -uc
+	debuild -us -uc -I -I'.vagrant' -I'*.egg-info' -I'dist'
 
 .PHONY: debian/changelog
 debian/changelog: clean-debian/changelog
