@@ -15,8 +15,6 @@ try:
     v, *dev = p.stdout.readlines()[0].strip().decode('utf-8')[1:].split('-')
     formats = ['{}', '{}.dev0+{}', '{}.dev{}+{}', '{}.dev{}+{}.{}']
     version = formats[len(dev)].format(v, *dev)
-    with open('ticklet/VERSION', 'w') as f:
-        print(version, file=f)
 except:
     try:
         with open('ticklet/VERSION', 'r') as f:
