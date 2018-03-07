@@ -67,4 +67,8 @@ config = Config({
         ## Notes
 
         """),
+    'plugins': {
+        'filters': [],
+        'openers': [],
+    },
 })

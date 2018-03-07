@@ -75,7 +75,7 @@ sudo apt install python3 python3-yaml
 Some of `ticklet`'s behavior can be configured through `~/.config/ticklet.yaml`.
 
 ```yaml
-# Example config showing the default settings
+# Example config
 ---
 directory:
   active: /home/yourname/tickets/active
@@ -96,4 +96,12 @@ template: |
   ## Notes
   
   
+
+plugins:
+  filters:
+    - git
+  openers:
+    - nemo
+    - gnome_terminal
+    - vscode
 ```
