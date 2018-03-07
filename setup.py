@@ -41,7 +41,19 @@ setuptools.setup(
     url='https://github.com/rgson/ticket-tool',
     download_url='https://github.com/rgson/ticklet/tarball/' + version,
     packages=setuptools.find_packages(),
-    entry_points={'console_scripts': ['ticklet = ticklet.cli:run']},
+    entry_points="""
+        [console_scripts]
+        ticklet = ticklet.cli:run
+
+        [ticklet.plugins.filters]
+        git = ticklet.plugins.filters:git
+
+        [ticklet.plugins.openers]
+        gnome_terminal = ticklet.plugins.openers:gnome_terminal
+        nemo           = ticklet.plugins.openers:nemo
+        sublime        = ticklet.plugins.openers:sublime
+        vscode         = ticklet.plugins.openers:vscode
+    """,
     package_data={'': ['VERSION']},
     install_requires=requirements,
     platforms=['Linux'],

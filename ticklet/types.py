@@ -23,6 +23,7 @@ import shutil
 import subprocess
 
 from .config import config
+from .plugins import run_filters, run_openers
 
 
 class TicketNotFound(Exception):
@@ -82,17 +83,12 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         return Ticket(self.id, target_path)
 
     def open(self):
+        files, dirs = [], [self.path]
         n = Notes.read(self)
         if n:
-            roots = {External.find_git_root(f) for f in n.files}
-            repos = [r for r in roots if r]
             files = [n.path] + n.files
-            directories = [self.path] + repos
-        else:
-            files, directories = [], [self.path]
-        External.open_sublime(files, directories)
-        External.open_nemo(directories)
-        External.open_gnome_terminal(directories)
+        files, dirs = run_filters(files, dirs)
+        run_openers(files, dirs)
 
 
 class Notes(collections.namedtuple('Notes', 'path summary status files')):
@@ -148,35 +144,3 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                 elif files_section and line.startswith('## '):
                     files_section = False
                 print(line, end='')
-
-
-class External:
-
-    @staticmethod
-    def open_sublime(files=[], dirs=[]):
-        External._start_program(['subl'] + files + dirs)
-
-    @staticmethod
-    def open_nemo(dirs=[]):
-        External._start_program(['nemo'] + dirs)
-
-    @staticmethod
-    def open_gnome_terminal(dirs=[]):
-        tabs = [x for d in dirs for x in ['--tab', '--working-directory', d]]
-        cmd = ['gnome-terminal', '--geometry', '80x88+0+0'] + tabs
-        External._start_program(cmd)
-
-    @staticmethod
-    def _start_program(cmd):
-        subprocess.Popen(cmd,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    @staticmethod
-    def find_git_root(filename):
-        try:
-            dirname = os.path.dirname(filename)
-            p = subprocess.run(['git', 'rev-parse', '--show-toplevel'],
-                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=dirname)
-            return p.stdout.decode('utf-8').strip() or None
-        except FileNotFoundError:
-            return None
