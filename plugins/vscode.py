@@ -15,21 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Ticklet.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import subprocess
 
 
-def git(files=None, dirs=None):
-    def find_toplevel(filename):
-        try:
-            dirname = os.path.dirname(filename)
-            p = subprocess.run(['git', 'rev-parse', '--show-toplevel'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=dirname)
-            repo = p.stdout.decode('utf-8').strip()
-            return repo
-        except:
-            return None
-    if files:
-        repos = {find_toplevel(f) for f in files}
-        dirs = (dirs or []) + [r for r in repos if r]
-    return files, dirs
+def open_files(files=None, dirs=None):
+    if not files and not dirs:
+        return
+    cmd = ['code', '-n'] + files + dirs
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

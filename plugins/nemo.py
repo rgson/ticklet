@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Ticklet.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = 'unknown'
+import subprocess
 
-try:
-    from os.path import abspath, dirname, join
-    with open(join(abspath(dirname(__file__)), 'VERSION')) as f:
-        __version__ = f.readlines()[0].strip()
-except FileNotFoundError:
-    pass
+
+def open_files(files=None, dirs=None):
+    if not dirs:
+        return
+    cmd = ['nemo'] + dirs
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

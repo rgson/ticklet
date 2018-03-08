@@ -1,41 +1,60 @@
 #!/usr/bin/make -f
 
-srcs := $(shell find ticklet/ -name '*.py')
+SHELL := /bin/sh
+
+srcdir := .
+
+prefix      := /usr/local
+exec_prefix := $(prefix)
+bindir      := $(exec_prefix)/bin
+libdir      := $(exec_prefix)/lib
+
+plugins := $(shell find $(srcdir)/plugins/ -name '*.py' -printf '%f\n')
+outdir  := build
+
+.SUFFIXES:
 
 .PHONY: all
-all: clean test sdist bdist deb
+all: clean test-src build test
+
+.PHONY: rebuild
+rebuild: clean build
 
 .PHONY: clean
-clean: clean-debian/changelog
-	dpkg-buildpackage -rfakeroot -Tclean
-	python3 setup.py clean
-	rm -rf build dist *.egg-info
-	rm ticklet/VERSION
+clean:
+	rm -rf $(outdir)
+
+.PHONY: build
+build: $(outdir)/ticklet $(addprefix $(outdir)/plugins/, $(plugins))
+
+$(outdir)/plugins/%.py: $(srcdir)/plugins/%.py
+	@mkdir -p $(dir $@)
+	cp $< $@
+
+$(outdir)/ticklet: $(srcdir)/ticklet.py
+	@mkdir -p $(dir $@)
+	cp $^ $@
+	v=$$(git describe --tags --always --dirty --match 'v[0-9]*\.[0-9]*\.[0-9]*'\
+		| tail -c +2) && sed -i "s,^\(__version__ *= *\)'.*'$$,\1'$$v'," $@
+	sed -i "s,^\(LIBDIR *= *\)'.*'$$,\1'$(libdir)'," $@
+	chmod +x $@
 
 .PHONY: test
-test:
-	@for test in tests/*; do ./"$$test" || exit $$?; done
+test: $(outdir)/ticklet
+	for test in tests/*; do ./$$test $^ || exit $$?; done
 
-.PHONY: sdist
-sdist: setup.py $(srcs) ticklet/VERSION
-	python3 setup.py sdist
+.PHONY: test-src
+test-src:
+	for test in tests/*; do ./$$test || exit $$?; done
 
-.PHONY: bdist
-bdist: setup.py $(srcs) ticklet/VERSION
-	python3 setup.py bdist
+.PHONY: install
+install: $(DESTDIR)$(bindir)/ticklet \
+         $(addprefix $(DESTDIR)$(libdir)/ticklet/plugins/, $(plugins))
 
-.PHONY: deb
-deb: debian/changelog $(srcs) ticklet/VERSION
-	debuild -us -uc -I -I'.vagrant' -I'*.egg-info' -I'dist'
+$(DESTDIR)$(bindir)/ticklet: $(outdir)/ticklet
+	@mkdir -p $(dir $@)
+	install -m 0755 $^ $@
 
-.PHONY: debian/changelog
-debian/changelog: clean-debian/changelog
-	gbp dch -a --debian-tag 'v%(version)s' -N $$(./setup.py -V)-1 \
-		--urgency low --ignore-branch
-
-.PHONY: clean-debian/changelog
-clean-debian/changelog:
-	sed -ri '/UNRELEASED/d; /^ticklet ([\d.-]*)/,$$!d' debian/changelog
-
-ticklet/VERSION: setup.py
-	python3 setup.py --version >$@
+$(DESTDIR)$(libdir)/ticklet/plugins/%.py: $(outdir)/plugins/%.py
+	@mkdir -p $(dir $@)
+	install -m 0644 $^ $@
