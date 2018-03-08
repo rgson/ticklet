@@ -2,7 +2,7 @@
 
 me=$(basename $0)
 fail() { echo "$me: fail: $1" >&2; exit 1; }
-ticklet='/usr/bin/env python3 -m ticklet'
+ticklet=${1:-'./ticklet.py'}
 
 diff \
 	<($ticklet -h) \
