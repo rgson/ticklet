@@ -12,9 +12,15 @@ def setup
   <<~HEREDOC
 
     apt install -y \
+      devscripts \
+      equivs \
+      fakeroot \
       git \
+      git-buildpackage \
       python3-yaml \
       ;
+
+    mk-build-deps -i -s sudo -t 'apt -y' /vagrant/debian/control
 
   HEREDOC
 end

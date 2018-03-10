@@ -26,6 +26,7 @@ rebuild: clean build
 .PHONY: clean
 clean:
 	rm -rf $(outdir)
+	dh_clean
 
 .PHONY: build
 build: $(outdir)/ticklet $(addprefix $(outdir)/plugins/, $(plugins))
@@ -67,6 +68,17 @@ tar:
 	v=$(version) ;\
 	t=$$(mktemp) ;\
 	git ls-files | sed -e '/^.gitignore$$/d' -e '/^.travis.yml$$/d' \
-		-e "s,.*,$$d/&," >$$t ;\
+		-e '\,^debian/,d' -e "s,.*,$$d/&," >$$t ;\
 	cd .. && tar cfz $$d/ticklet_$$v.tar.gz -T $$t ;\
 	rm $$t
+
+.PHONY: deb
+deb: tar build debian/changelog
+	mv ticklet_*.tar.gz ../$$(basename ticklet_*.tar.gz .tar.gz).orig.tar.gz
+	debuild -us -uc
+
+.PHONY: debian/changelog
+debian/changelog: $(outdir)/ticklet
+	sed -i '/UNRELEASED/d; /^ticklet/,$$!d' debian/changelog
+	gbp dch -a --debian-tag 'v%(version)s' -N $(version)-1 \
+		--urgency low --ignore-branch

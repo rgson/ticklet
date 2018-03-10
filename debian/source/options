@@ -1,0 +1,4 @@
+extend-diff-ignore = ".travis.yml|.vagrant"
+tar-ignore
+tar-ignore = ".travis.yml"
+tar-ignore = ".vagrant"

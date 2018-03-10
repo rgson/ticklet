@@ -1,0 +1,15 @@
+Source: ticklet
+Section: misc
+Priority: optional
+Maintainer: Robin Gustafsson <robin@rgson.se>
+Build-Depends: debhelper (>= 9), dh-python, python3-all (>= 3.3)
+Vcs-Browser: https://github.com/rgson/ticklet
+Vcs-Git: https://github.com/rgson/ticklet.git
+Homepage: https://github.com/rgson/ticklet
+
+Package: ticklet
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, python3-yaml
+Description: Command-line tool for ticket management
+ A command-line tool for ticket management (the bug tracker kind).
+ Keeps track of tickets, including status, affected files and related notes.

@@ -10,5 +10,18 @@ python:
 
 script: make test
 
+jobs:
+  include:
+
+    - stage: Debian
+      install: >
+        sudo apt-get install -yq --no-install-suggests --no-install-recommends
+        devscripts fakeroot equivs git-buildpackage &&
+        mk-build-deps -i -s sudo -t 'apt-get -yq' debian/control
+      script: make deb && sudo dpkg -i ../*.deb
+      python: 3.4
+      virtualenv:
+        system_site_packages: true
+
 notifications:
   email: false
