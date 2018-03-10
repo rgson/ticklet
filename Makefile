@@ -12,6 +12,9 @@ libdir      := $(exec_prefix)/lib
 plugins := $(shell find $(srcdir)/plugins/ -name '*.py' -printf '%f\n')
 outdir  := build
 
+version = $$(git describe --tags --always --dirty \
+	--match 'v[0-9]*\.[0-9]*\.[0-9]*' | tail -c +2)
+
 .SUFFIXES:
 
 .PHONY: all
@@ -34,8 +37,7 @@ $(outdir)/plugins/%.py: $(srcdir)/plugins/%.py
 $(outdir)/ticklet: $(srcdir)/ticklet.py
 	@mkdir -p $(dir $@)
 	cp $^ $@
-	v=$$(git describe --tags --always --dirty --match 'v[0-9]*\.[0-9]*\.[0-9]*'\
-		| tail -c +2) && sed -i "s,^\(__version__ *= *\)'.*'$$,\1'$$v'," $@
+	sed -i "s,^\(__version__ *= *\)'.*'$$,\1'$(version)'," $@
 	sed -i "s,^\(LIBDIR *= *\)'.*'$$,\1'$(libdir)'," $@
 	chmod +x $@
 
@@ -58,3 +60,13 @@ $(DESTDIR)$(bindir)/ticklet: $(outdir)/ticklet
 $(DESTDIR)$(libdir)/ticklet/plugins/%.py: $(outdir)/plugins/%.py
 	@mkdir -p $(dir $@)
 	install -m 0644 $^ $@
+
+.PHONY: tar
+tar:
+	d=$$(basename $$(pwd)) ;\
+	v=$(version) ;\
+	t=$$(mktemp) ;\
+	git ls-files | sed -e '/^.gitignore$$/d' -e '/^.travis.yml$$/d' \
+		-e "s,.*,$$d/&," >$$t ;\
+	cd .. && tar cfz $$d/ticklet_$$v.tar.gz -T $$t ;\
+	rm $$t
