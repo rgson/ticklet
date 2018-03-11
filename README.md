@@ -38,6 +38,10 @@ optional arguments:
 The recommended approach for users of Debian-based systems is to install the
 program in the form of a `.deb` package.
 
+Pre-built `.deb` packages can be downloaded from the
+[releases page](https://github.com/rgson/ticklet/releases).
+Alternatively, one can be built from source: 
+
 ```sh
 # 1. Build the .deb package
 sudo apt install devscripts fakeroot equivs git-buildpackage
