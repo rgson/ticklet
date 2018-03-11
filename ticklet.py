@@ -261,7 +261,7 @@ config = Config({
 
 # Load configuration
 
-user_config_file = '{}/ticklet.yaml'.format(
+user_config_file = '{}/ticklet'.format(
     os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')))
 try:
     with open(user_config_file) as f:
