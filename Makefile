@@ -25,7 +25,7 @@ endif
 .SUFFIXES:
 
 .PHONY: all
-all: test-src build test
+all: build
 
 .PHONY: rebuild
 rebuild: clean build
