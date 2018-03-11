@@ -98,10 +98,11 @@ template: |
   
 
 plugins:
-  filters:
-    - git
-  openers:
-    - nemo
-    - gnome_terminal
-    - vscode
+  files:
+    filter:
+      - git
+    open:
+      - nemo
+      - gnome_terminal
+      - vscode
 ```

@@ -218,12 +218,12 @@ class Plugins:
         return module
 
     def run_filters(self, files, dirs):
-        for p in config['plugins.filters']:
+        for p in config['plugins.files.filter']:
             files, dirs = self[p].filter_files(files, dirs)
         return files, dirs
 
     def run_openers(self, files, dirs):
-        for p in config['plugins.openers']:
+        for p in config['plugins.files.open']:
             self[p].open_files(files, dirs)
 
 
@@ -252,8 +252,10 @@ config = Config({
 
         """),
     'plugins': {
-        'filters': [],
-        'openers': [],
+        'files': {
+            'filter': [],
+            'open': [],
+        },
     },
 })
 
