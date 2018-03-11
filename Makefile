@@ -8,6 +8,10 @@ prefix      := /usr/local
 exec_prefix := $(prefix)
 bindir      := $(exec_prefix)/bin
 libdir      := $(exec_prefix)/lib
+datarootdir := $(prefix)/share
+mandir      := $(datarootdir)/man
+man1dir     := $(mandir)/man1
+man1ext     := .1
 
 plugins := $(shell find $(srcdir)/plugins/ -name '*.py' -printf '%f\n')
 outdir  := build
@@ -58,15 +62,28 @@ test: $(outdir)/ticklet
 test-src:
 	for test in tests/*; do ./$$test || exit $$?; done
 
+.PHONY: man
+man: $(outdir)/man/ticklet$(man1ext)
+
+$(outdir)/man/ticklet$(man1ext): $(outdir)/ticklet $(srcdir)/man/ticklet.h2m
+	@mkdir -p $(dir $@)
+	help2man -i $(word 2,$^) -o $@ $<
+	sed -ni '1,/usage:/{/usage:/!p}; /arguments:/,$$p' $@
+
 .PHONY: install
 install: $(DESTDIR)$(bindir)/ticklet \
-         $(addprefix $(DESTDIR)$(libdir)/ticklet/plugins/, $(plugins))
+         $(addprefix $(DESTDIR)$(libdir)/ticklet/plugins/, $(plugins)) \
+         $(DESTDIR)$(man1dir)/ticklet$(man1ext)
 
 $(DESTDIR)$(bindir)/ticklet: $(outdir)/ticklet
 	@mkdir -p $(dir $@)
 	install -m 0755 $^ $@
 
 $(DESTDIR)$(libdir)/ticklet/plugins/%.py: $(outdir)/plugins/%.py
+	@mkdir -p $(dir $@)
+	install -m 0644 $^ $@
+
+$(DESTDIR)$(man1dir)/%$(man1ext): $(outdir)/man/%$(man1ext)
 	@mkdir -p $(dir $@)
 	install -m 0644 $^ $@
 

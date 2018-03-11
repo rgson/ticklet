@@ -1,0 +1,54 @@
+--locale=C
+--no-info
+--section 1
+
+[NAME]
+ticklet - a command-line tool for ticket management
+
+[SYNOPSIS]
+.B ticklet
+[\fIOPTION\fR]... [\fITICKET\fR]...
+
+[<DESCRIPTION]
+.B ticklet
+is a command-line tool for ticket management (the bug tracker kind).
+It keeps track of tickets, including status, affected files and related notes.
+
+[EXAMPLES]
+Create and/or open a ticket with the identifier 'xyz-136':
+
+	ticklet xyz-136
+
+Display an overview of all active tickets:
+
+	ticklet -l
+
+Update the status of ticket 'xyz-136' and move it to the archive:
+
+	ticklet -s 'Fixed in v2.4.3' -a xyz-136
+
+[AUTHOR]
+Written by Robin Gustafsson.
+
+[REPORTING BUGS]
+Bug reports can be submitted at <https://github.com/rgson/ticklet>.
+
+[COPYRIGHT]
+Copyright (c) 2018, Robin Gustafsson <robin@rgson.se>
+
+Ticklet is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Ticklet is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Ticklet.  If not, see <http://www.gnu.org/licenses/>.
+
+[SEE ALSO]
+The full documentation and source code for this program can be found at
+<https://github.com/rgson/ticklet>.

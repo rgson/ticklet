@@ -2,7 +2,8 @@ Source: ticklet
 Section: misc
 Priority: optional
 Maintainer: Robin Gustafsson <robin@rgson.se>
-Build-Depends: debhelper (>= 9), dh-python, python3-all (>= 3.3)
+Build-Depends: debhelper (>= 9), dh-python, python3-all (>= 3.3),
+  help2man, python3-yaml
 Vcs-Browser: https://github.com/rgson/ticklet
 Vcs-Git: https://github.com/rgson/ticklet.git
 Homepage: https://github.com/rgson/ticklet
