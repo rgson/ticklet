@@ -72,6 +72,7 @@ $(DESTDIR)$(libdir)/ticklet/plugins/%.py: $(outdir)/plugins/%.py
 
 .PHONY: tar
 tar: VERSION
+	set -e ;\
 	d=$$(basename $$(pwd)) ;\
 	t=$$(mktemp) ;\
 	git ls-files | sed -e '/^.gitignore$$/d' -e '/^.travis.yml$$/d' \
