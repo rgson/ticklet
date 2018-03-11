@@ -18,6 +18,9 @@ jobs:
         sudo apt-get install -yq --no-install-suggests --no-install-recommends
         devscripts fakeroot equivs git-buildpackage &&
         mk-build-deps -i -s sudo -t 'apt-get -yq' debian/control
+      before_script: |
+        git clean -df
+        git reset --hard
       script: make deb && sudo dpkg -i ../*.deb
       python: 3.4
       virtualenv:
