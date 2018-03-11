@@ -21,7 +21,9 @@ jobs:
       before_script: |
         git clean -df
         git reset --hard
-      script: make deb && sudo dpkg -i ../*.deb
+      script: >
+        DEB_BUILD_OPTIONS=nocheck make deb &&
+        sudo dpkg -i ../*.deb
       python: 3.4
       virtualenv:
         system_site_packages: true
