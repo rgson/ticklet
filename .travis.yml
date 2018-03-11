@@ -23,7 +23,7 @@ jobs:
         git reset --hard
       script: >
         DEB_BUILD_OPTIONS=nocheck make deb &&
-        sudo dpkg -i ../*.deb
+        sudo apt install ../*.deb
       python: 3.4
       virtualenv:
         system_site_packages: true
