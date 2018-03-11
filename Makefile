@@ -110,5 +110,7 @@ deb: tar build debian/changelog
 .PHONY: debian/changelog
 debian/changelog: $(outdir)/ticklet
 	sed -i '/UNRELEASED/d; /^ticklet/,$$!d' debian/changelog
-	gbp dch -a --debian-tag 'v%(version)s' -N $(version)-1 \
-		--urgency low --ignore-branch
+	if ! grep -q $(version)-1 $@; then \
+		gbp dch -a --debian-tag='v%(version)s' -N $(version)-1 \
+			--urgency low --ignore-branch || exit $$? ;\
+	fi
