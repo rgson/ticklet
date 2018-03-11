@@ -10,17 +10,9 @@ end
 
 def setup
   <<~HEREDOC
-
-    apt install -y \
-      devscripts \
-      equivs \
-      fakeroot \
-      git \
-      git-buildpackage \
-      python3-yaml \
-      ;
-
-    mk-build-deps -i -s sudo -t 'apt -y' /vagrant/debian/control
-
+    echo 'LC_ALL=en_US.UTF-8' >>/etc/default/locale
+    cd /home/vagrant
+    apt install -y devscripts fakeroot equivs git-buildpackage
+    mk-build-deps -i -t 'apt -y' ticklet/debian/control
   HEREDOC
 end
