@@ -10,16 +10,16 @@ Run `ticklet -h` for usage instructions:
 ```
 usage: ticklet [-h] [--version] [-l] [-k] [-a] [-u] [-o] [-d] [-s STATUS]
                [-m SUMMARY]
-               [ticket [ticket ...]]
+               [TICKET [TICKET ...]]
 
 positional arguments:
-  ticket                the ticket ID(s) to open/change
+  TICKET                ticket(s) to act upon
 
 optional arguments:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
-  -l, --list            list tickets
-  -k, --list-all        list tickets, including archive
+  -l, --list            list active tickets
+  -k, --list-all        list all tickets
   -a, --archive         move tickets to archive
   -u, --unarchive       move tickets from archive
   -o, --open            open existing tickets only

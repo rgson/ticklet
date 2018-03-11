@@ -273,16 +273,16 @@ for directory in config['directory'].values():
 # Parse command-line arguments
 
 parser = argparse.ArgumentParser('ticklet')
-parser.add_argument(       '--version'  , version=__version__                   , action='version'   )
-parser.add_argument('-l' , '--list'     , help='list tickets'                   , action='store_true')
-parser.add_argument('-k' , '--list-all' , help='list tickets, including archive', action='store_true')
-parser.add_argument('-a' , '--archive'  , help='move tickets to archive'        , action='store_true')
-parser.add_argument('-u' , '--unarchive', help='move tickets from archive'      , action='store_true')
-parser.add_argument('-o' , '--open'     , help='open existing tickets only'     , action='store_true')
-parser.add_argument('-d' , '--delete'   , help='delete tickets'                 , action='store_true')
-parser.add_argument('-s' , '--status'   , help='set the status'                                      )
-parser.add_argument('-m' , '--summary'  , help='set the summary'                                     )
-parser.add_argument('ticket'            , help='the ticket ID(s) to open/change', nargs='*'          )
+parser.add_argument(       '--version'  , version=__version__              , action='version'           )
+parser.add_argument('-l' , '--list'     , help='list active tickets'       , action='store_true'        )
+parser.add_argument('-k' , '--list-all' , help='list all tickets'          , action='store_true'        )
+parser.add_argument('-a' , '--archive'  , help='move tickets to archive'   , action='store_true'        )
+parser.add_argument('-u' , '--unarchive', help='move tickets from archive' , action='store_true'        )
+parser.add_argument('-o' , '--open'     , help='open existing tickets only', action='store_true'        )
+parser.add_argument('-d' , '--delete'   , help='delete tickets'            , action='store_true'        )
+parser.add_argument('-s' , '--status'   , help='set the status'                                         )
+parser.add_argument('-m' , '--summary'  , help='set the summary'                                        )
+parser.add_argument('tickets'           , help='ticket(s) to act upon'     , nargs='*', metavar='TICKET')
 args = parser.parse_args()
 
 conflicting_arguments = [
@@ -298,13 +298,13 @@ for conflicts in conflicting_arguments:
 
 # Default to creating and opening tickets
 
-no_action = not any(v for k, v in args.__dict__.items() if k != 'ticket')
+no_action = not any(v for k, v in args.__dict__.items() if k != 'tickets')
 args.create = no_action
 args.open |= no_action
 
 # Perform requested actions
 
-if no_action and not args.ticket:
+if no_action and not args.tickets:
     parser.print_help()
 
 if args.list or args.list_all:
@@ -312,14 +312,14 @@ if args.list or args.list_all:
     tickets = sorted(tickets, key=operator.attrgetter('id'))
     print('\n'.join(str(t) for t in tickets))
 
-elif not args.ticket:
+elif not args.tickets:
     print('No tickets specified for action', file=sys.stderr)
     sys.exit(1)
 
 else:
     missing_tickets = False
 
-    for ticket_id in args.ticket:
+    for ticket_id in args.tickets:
         try:
             t = Ticket.find(ticket_id)
         except TicketNotFound as e:
