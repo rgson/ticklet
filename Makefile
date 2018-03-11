@@ -12,13 +12,20 @@ libdir      := $(exec_prefix)/lib
 plugins := $(shell find $(srcdir)/plugins/ -name '*.py' -printf '%f\n')
 outdir  := build
 
-version = $$(git describe --tags --always --dirty \
+has_git := $(shell which git >/dev/null && git rev-parse 2>/dev/null \
+	&& echo true || echo false)
+
+ifeq ($(has_git), true)
+version := $(shell git describe --tags --always --dirty \
 	--match 'v[0-9]*\.[0-9]*\.[0-9]*' | tail -c +2)
+else
+version := $(shell cat VERSION)
+endif
 
 .SUFFIXES:
 
 .PHONY: all
-all: clean test-src build test
+all: test-src build test
 
 .PHONY: rebuild
 rebuild: clean build
@@ -26,7 +33,8 @@ rebuild: clean build
 .PHONY: clean
 clean:
 	rm -rf $(outdir)
-	dh_clean
+	if $(has_git); then rm -f VERSION; fi
+	if which dh_clean >/dev/null && [ -d debian ]; then dh_clean; fi
 
 .PHONY: build
 build: $(outdir)/ticklet $(addprefix $(outdir)/plugins/, $(plugins))
@@ -63,14 +71,18 @@ $(DESTDIR)$(libdir)/ticklet/plugins/%.py: $(outdir)/plugins/%.py
 	install -m 0644 $^ $@
 
 .PHONY: tar
-tar:
+tar: VERSION
 	d=$$(basename $$(pwd)) ;\
-	v=$(version) ;\
 	t=$$(mktemp) ;\
 	git ls-files | sed -e '/^.gitignore$$/d' -e '/^.travis.yml$$/d' \
 		-e '\,^debian/,d' -e "s,.*,$$d/&," >$$t ;\
-	cd .. && tar cfz $$d/ticklet_$$v.tar.gz -T $$t ;\
+	echo $$d/VERSION >>$$t ;\
+	cd .. && tar cfz $$d/ticklet_$(version).tar.gz -T $$t ;\
 	rm $$t
+
+.PHONY: VERSION
+VERSION:
+	echo $(version) >$@
 
 .PHONY: deb
 deb: tar build debian/changelog
