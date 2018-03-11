@@ -17,7 +17,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --version             output version info and exit
+  --version             show program's version number and exit
   -l, --list            list tickets
   -k, --list-all        list tickets, including archive
   -a, --archive         move tickets to archive

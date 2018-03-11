@@ -273,7 +273,7 @@ for directory in config['directory'].values():
 # Parse command-line arguments
 
 parser = argparse.ArgumentParser('ticklet')
-parser.add_argument(       '--version'  , help='output version info and exit'   , action='store_true')
+parser.add_argument(       '--version'  , version=__version__                   , action='version'   )
 parser.add_argument('-l' , '--list'     , help='list tickets'                   , action='store_true')
 parser.add_argument('-k' , '--list-all' , help='list tickets, including archive', action='store_true')
 parser.add_argument('-a' , '--archive'  , help='move tickets to archive'        , action='store_true')
@@ -284,10 +284,6 @@ parser.add_argument('-s' , '--status'   , help='set the status'                 
 parser.add_argument('-m' , '--summary'  , help='set the summary'                                     )
 parser.add_argument('ticket'            , help='the ticket ID(s) to open/change', nargs='*'          )
 args = parser.parse_args()
-
-if args.version:
-    print(__version__)
-    sys.exit(0)
 
 conflicting_arguments = [
     {'-a/--archive': args.archive, '-u/--unarchive': args.unarchive},
