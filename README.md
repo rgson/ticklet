@@ -133,7 +133,8 @@ Conceptually, plugins are divided into two categories: *filters* and *openers*.
 Plugins are created in the form of very simple Python modules, consisting of a
 single Python source file defining one or both of the functions
 `filter_files(files, dirs)` and `open_files(files, dirs)`.
-The source file must be installed in the plugin directory (default: `/usr/local/lib/ticklet/plugins`, or `/usr/lib/ticklet/plugins` on Debian).
+The source file must be installed in the plugin directory (default:
+`/usr/local/lib/ticklet/plugins`, or `/usr/lib/ticklet/plugins` on Debian).
 
 The [user configuration](#configuration) determines which plugins that are
 loaded and used.
