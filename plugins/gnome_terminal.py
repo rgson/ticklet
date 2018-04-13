@@ -22,5 +22,5 @@ def open_files(files=None, dirs=None):
     if not dirs:
         return
     tabs = [x for d in dirs for x in ['--tab', '--working-directory', d]]
-    cmd = ['gnome-terminal', '--geometry', '80x88+0+0'] + tabs
+    cmd = ['gnome-terminal'] + tabs
     subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
