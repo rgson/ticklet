@@ -1,3 +1,9 @@
+ticklet (1.1.0-1) unstable; urgency=low
+
+  * Release 1.1.0
+
+ -- Robin Gustafsson <robin@rgson.se>  Fri, 13 Apr 2018 21:43:30 +0200
+
 ticklet (1.0.0-1) unstable; urgency=low
 
   * Public release.
