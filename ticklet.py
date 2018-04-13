@@ -257,6 +257,8 @@ config = Config({
             'open': [],
         },
     },
+    'profiles': {
+    },
 })
 
 # Load configuration
@@ -268,9 +270,6 @@ try:
         config.update(yaml.load(f))
 except FileNotFoundError:
     pass
-
-for directory in config['directory'].values():
-    os.makedirs(directory, exist_ok=True)
 
 # Parse command-line arguments
 
@@ -284,6 +283,7 @@ parser.add_argument('-o' , '--open'     , help='open existing tickets only', act
 parser.add_argument('-d' , '--delete'   , help='delete tickets'            , action='store_true'        )
 parser.add_argument('-s' , '--status'   , help='set the status'                                         )
 parser.add_argument('-m' , '--summary'  , help='set the summary'                                        )
+parser.add_argument('-p' , '--profile'  , help='use an alternative configurations profile'              )
 parser.add_argument('tickets'           , help='ticket(s) to act upon'     , nargs='*', metavar='TICKET')
 args = parser.parse_args()
 
@@ -298,9 +298,24 @@ for conflicts in conflicting_arguments:
         print('Conflicting options:', ', '.join(names), file=sys.stderr)
         sys.exit(1)
 
+# Load the requested config profile (if any)
+
+if args.profile:
+    try:
+        config.update(config['profiles.' + args.profile])
+    except:
+        print('Profile not found:', args.profile, file=sys.stderr)
+        sys.exit(1)
+
+# Ensure that the ticket directories exist
+
+for directory in config['directory'].values():
+    os.makedirs(directory, exist_ok=True)
+
 # Default to creating and opening tickets
 
-no_action = not any(v for k, v in args.__dict__.items() if k != 'tickets')
+ignore_args = {'tickets', 'profile'}
+no_action = not any(v for k, v in args.__dict__.items() if k not in ignore_args)
 args.create = no_action
 args.open |= no_action
 

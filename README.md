@@ -10,7 +10,7 @@ The program also comes with an associated manual page (`man ticklet`).
 
 ```
 usage: ticklet [-h] [--version] [-l] [-k] [-a] [-u] [-o] [-d] [-s STATUS]
-               [-m SUMMARY]
+               [-m SUMMARY] [-p PROFILE]
                [TICKET [TICKET ...]]
 
 positional arguments:
@@ -29,6 +29,8 @@ optional arguments:
                         set the status
   -m SUMMARY, --summary SUMMARY
                         set the summary
+  -p PROFILE, --profile PROFILE
+                        use an alternative configurations profile
 ```
 
 ## Installation
@@ -117,6 +119,15 @@ plugins:
       - nemo
       - gnome_terminal
       - vscode
+
+profiles:
+  read: # the profile's name
+    plugins:
+      files:
+        filter:
+          - notes_only
+        open:
+          - vscode
 ```
 
 ## Plugins
@@ -141,3 +152,10 @@ loaded and used.
 
 A few example plugins are included in the [plugins](plugins) directory, e.g. the
 [git filter](plugins/git.py) and the [Nemo opener](plugins/nemo.py).
+
+## Profiles
+
+Profiles allow configurations to be temporarily overridden using the
+`-p`/`--profile` option. Settings specified in a profile will temporarily
+override the corresponding settings as defined in the user's default
+configuration, while retaining the rest without change.
