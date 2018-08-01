@@ -91,10 +91,11 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         return Ticket(self.id, target_path)
 
     def open(self):
-        files, dirs = [], [self.path]
+        files = [], [self.path]
         n = Notes.read(self)
         if n:
             files = [n.path] + n.files
+            dirs = [os.path.dirname(filename) for filename in files]
         files, dirs = plugins.run_filters(files, dirs)
         plugins.run_openers(files, dirs)
 
