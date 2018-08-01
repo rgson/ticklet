@@ -117,7 +117,7 @@ plugins:
       - git
     open:
       - nemo
-      - gnome_terminal
+      - gnome-terminal
       - vscode
 
 profiles:
