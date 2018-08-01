@@ -212,7 +212,7 @@ class Plugins:
             spec = importlib.util.spec_from_file_location(plugin, path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-        except ImportError:
+        except (AttributeError, ImportError):
             from importlib.machinery import SourceFileLoader
             module = SourceFileLoader(plugin, path).load_module()
         return module
