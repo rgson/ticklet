@@ -18,7 +18,7 @@
 import subprocess
 
 
-def open_files(files=None, dirs=None):
+def open_files(files, dirs):
     if not dirs:
         return
     cmd = ['thunar'] + dirs

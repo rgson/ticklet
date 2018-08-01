@@ -19,7 +19,7 @@ import os
 import subprocess
 
 
-def filter_files(files=None, dirs=None):
+def filter_files(files, dirs):
     def find_toplevel(filename):
         try:
             dirname = os.path.dirname(filename)
@@ -29,7 +29,6 @@ def filter_files(files=None, dirs=None):
             return repo
         except:
             return None
-    if files:
-        repos = {find_toplevel(f) for f in files}
-        dirs = (dirs or []) + [r for r in repos if r]
+    repos = {find_toplevel(f) for f in files}
+    dirs += [r for r in repos if r]
     return files, dirs

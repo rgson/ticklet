@@ -18,7 +18,7 @@
 import subprocess
 
 
-def open_files(files=None, dirs=None):
+def open_files(files, dirs):
     if not files and not dirs:
         return
     cmd = ['subl'] + files + dirs
