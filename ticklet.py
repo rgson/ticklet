@@ -224,7 +224,12 @@ class Plugins:
         return files, dirs
 
     def run_openers(self, files, dirs):
-        for p in config['plugins.files.open']:
+        openers = config['plugins.files.open']
+        if not openers:
+            print("You don't have any openers enabled. To open tickets,\n"
+                  "add some to your configuration file ({})."
+                  .format(user_config_file), file=sys.stderr)
+        for p in openers:
             self[p].open_files(files, dirs)
 
 
