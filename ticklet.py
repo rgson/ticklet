@@ -75,10 +75,6 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         for d in glob.glob(directory + '/*/'):
             yield cls(id=d[len(directory)+1:-1], path=d[:-1])
 
-    def __str__(self):
-        n = Notes.read(self) or Notes(['']*4)
-        return '{:10}  {:25.25}  {}'.format(self.id, n.summary, n.status)
-
     def archive(self):
         return self._move_ticket(config['directory.archive'])
 
@@ -155,6 +151,26 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                 print(line, end='')
 
 
+def columnize(content, max_width=None):
+    padding = '  '
+    widths = [max(1, *map(len, column)) for column in zip(*content)]
+    cols = len(widths)
+    pad_width = len(padding) * (cols - 1)
+    if max_width is not None and max_width < cols + pad_width:
+        max_width = None  # max width is too small; ignore it
+    if max_width is not None and max_width < sum(widths) + pad_width:
+        available_width = max_width - pad_width
+        new_widths = [1] * cols
+        i = 0
+        while sum(new_widths) < available_width:
+            if new_widths[i] < widths[i]:
+                new_widths[i] += 1
+            i = (i + 1) % cols
+        widths = new_widths
+    return '\n'.join(padding.join(['{:{}.{}}'] * cols).format(
+        *(y for x in zip(r, widths, widths) for y in x)) for r in content)
+
+
 class Config:
 
     def __init__(self, config_values):
@@ -226,7 +242,7 @@ class Plugins:
     def run_openers(self, files, dirs):
         openers = config['plugins.files.open']
         if not openers:
-            print("You don't have any openers enabled. To open tickets,\n"
+            print("You don't have any openers enabled. To open tickets, "
                   "add some to your configuration file ({})."
                   .format(user_config_file), file=sys.stderr)
         for p in openers:
@@ -333,7 +349,11 @@ if no_action and not args.tickets:
 if args.list or args.list_all:
     tickets = Ticket.list(include_archived=args.list_all)
     tickets = sorted(tickets, key=operator.attrgetter('id'))
-    print('\n'.join(str(t) for t in tickets))
+    notes = (Notes.read(t) or Notes(['']*4) for t in tickets)
+    terminal_width = shutil.get_terminal_size((None, None)).columns
+    print(columnize(
+        content=[[t.id, n.summary, n.status] for t, n in zip(tickets, notes)],
+        max_width=(terminal_width - 1 if terminal_width else None)))
 
 elif not args.tickets:
     print('No tickets specified for action', file=sys.stderr)
