@@ -30,6 +30,7 @@ import os
 import shutil
 import subprocess
 import sys
+import texttable
 import textwrap
 import yaml
 
@@ -149,26 +150,6 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                 elif files_section and line.startswith('## '):
                     files_section = False
                 print(line, end='')
-
-
-def columnize(content, max_width=None):
-    padding = '  '
-    widths = [max(1, *map(len, column)) for column in zip(*content)]
-    cols = len(widths)
-    pad_width = len(padding) * (cols - 1)
-    if max_width is not None and max_width < cols + pad_width:
-        max_width = None  # max width is too small; ignore it
-    if max_width is not None and max_width < sum(widths) + pad_width:
-        available_width = max_width - pad_width
-        new_widths = [1] * cols
-        i = 0
-        while sum(new_widths) < available_width:
-            if new_widths[i] < widths[i]:
-                new_widths[i] += 1
-            i = (i + 1) % cols
-        widths = new_widths
-    return '\n'.join(padding.join(['{:{}.{}}'] * cols).format(
-        *(y for x in zip(r, widths, widths) for y in x)) for r in content)
 
 
 class Config:
@@ -350,10 +331,12 @@ if args.list or args.list_all:
     tickets = Ticket.list(include_archived=args.list_all)
     tickets = sorted(tickets, key=operator.attrgetter('id'))
     notes = (Notes.read(t) or Notes(['']*4) for t in tickets)
-    terminal_width = shutil.get_terminal_size((None, None)).columns
-    print(columnize(
-        content=[[t.id, n.summary, n.status] for t, n in zip(tickets, notes)],
-        max_width=(terminal_width - 1 if terminal_width else None)))
+    max_width = shutil.get_terminal_size((0, 0)).columns - 1
+    tbl = texttable.Texttable(max_width)
+    tbl.set_deco(0)
+    tbl.add_rows([[t.id, n.summary, n.status] for t, n in zip(tickets, notes)],
+                 header=False)
+    print(tbl.draw())
 
 elif not args.tickets:
     print('No tickets specified for action', file=sys.stderr)
