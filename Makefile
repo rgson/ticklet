@@ -20,7 +20,7 @@ has_git := $(shell which git >/dev/null && git rev-parse 2>/dev/null \
 	&& echo true || echo false)
 
 ifeq ($(has_git), true)
-version := $(shell git describe --tags --always --dirty \
+version := $(shell git describe --tags --always \
 	--match 'v[0-9]*\.[0-9]*\.[0-9]*' | tail -c +2)
 else
 version := $(shell cat VERSION)
