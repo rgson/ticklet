@@ -88,13 +88,13 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         return Ticket(self.id, target_path)
 
     def open(self):
-        files = [], [self.path]
+        files = set(), {self.path}
         n = Notes.read(self)
         if n:
-            files = [n.path] + n.files
-            dirs = [os.path.dirname(filename) for filename in files]
+            files = {n.path} | set(n.files)
+            dirs = {os.path.dirname(filename) for filename in files}
         files, dirs = plugins.run_filters(files, dirs)
-        plugins.run_openers(files, dirs)
+        plugins.run_openers(sorted(files), sorted(dirs))
 
 
 class Notes(collections.namedtuple('Notes', 'path summary status files')):

@@ -29,6 +29,6 @@ def filter_files(files, dirs):
             return repo
         except:
             return None
-    repos = {find_toplevel(f) for f in files}
-    dirs += [r for r in repos if r]
+    repos = (find_toplevel(f) for f in files)
+    dirs |= {r for r in repos if r}
     return files, dirs
