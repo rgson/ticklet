@@ -95,6 +95,9 @@ directory:
   active: /home/yourname/tickets/active
   archive: /home/yourname/tickets/archive
 
+display:
+  grid: false
+
 template: |
   # Ticket {id}
   

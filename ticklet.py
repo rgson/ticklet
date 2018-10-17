@@ -239,6 +239,9 @@ config = Config({
         'active': os.path.expanduser('~/tickets/active'),
         'archive': os.path.expanduser('~/tickets/archive'),
     },
+    'display': {
+        'grid': False,
+    },
     'template': textwrap.dedent("""\
         # Ticket {id}
 
@@ -333,7 +336,8 @@ if args.list or args.list_all:
     notes = (Notes.read(t) or Notes(['']*4) for t in tickets)
     max_width = shutil.get_terminal_size((0, 0)).columns - 1
     tbl = texttable.Texttable(max_width)
-    tbl.set_deco(0)
+    if not config['display.grid']:
+        tbl.set_deco(0)
     tbl.add_rows([[t.id, n.summary, n.status] for t, n in zip(tickets, notes)],
                  header=False)
     print(tbl.draw())
