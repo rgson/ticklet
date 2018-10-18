@@ -22,14 +22,10 @@ def open_files(files, dirs):
     if not files:
         return
 
-    file_list = [];
-    for index,file in enumerate(files):
-        file_list += [file];
-        if index%3 == 0 or file == files[-1]:
-            open_terminal(file_list);
-            file_list=[];
+    for i in range(0, len(files), 3):
+        open_terminal(files[i:i+3])
 
 def open_terminal(files):
-    cmd = ['gnome-terminal', '--', 'vim', '-O'] + files;
+    cmd = ['x-terminal-emulator', '-e','vim', '-O'] + files
     subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
