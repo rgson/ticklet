@@ -168,7 +168,7 @@ class Config:
         parts = key.split('.')
         for part in parts[:-1]:
             v = v[part]
-        v[key] = value
+        v[parts[-1]] = value
 
     def update(self, changed_values):
         def merge_dicts(a, b):
