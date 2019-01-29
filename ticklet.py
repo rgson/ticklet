@@ -85,7 +85,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
     def _move_ticket(self, target_dir):
         target_path = Ticket._path(self.id, target_dir)
         shutil.move(self.path, target_path)
-        return Ticket(self.id, target_path)
+        return self.__class__(self.id, target_path)
 
     def open(self):
         files = set(), {self.path}
