@@ -114,39 +114,26 @@ template: |
   ## Notes
   
   
-
-plugins:
-  files:
-    filter:
-      - git
-    open:
-      - nemo
-      - gnome-terminal
-      - vscode
 ```
 
-## Plugins
+## Openers
 
-Plugins define the actions taken when a ticket is opened. They define both the
-selection of files/directories that are opened and how they are opened.
+Openers define what happens when a ticket is opened.
 
-Conceptually, plugins are divided into two categories: *filters* and *openers*.
+An opener is an executable located in the `~/.config/ticklet/open` directory.
+When a ticket is opened, all of the configured openers are executed in
+lexicographic order. The full list of files from the ticket's notes, including
+the notes file itself, is passed as arguments. It may then filter and open the
+files in any way desired.
 
-- Filters are used to process the list of files from the ticket notes, before it
-  is passed to the openers.
-- Openers define how the files and directories are actually opened.
+Example:
+```sh
+# ~/.config/ticklet/open/example.sh
 
-Plugins are created in the form of very simple Python modules, consisting of a
-single Python source file defining one or both of the functions
-`filter_files(files, dirs)` and `open_files(files, dirs)`.
-The source file must be installed in the plugin directory (default:
-`/usr/local/lib/ticklet/plugins`, or `/usr/lib/ticklet/plugins` on Debian).
-
-The [user configuration](#configuration) determines which plugins that are
-loaded and used.
-
-A few example plugins are included in the [plugins](plugins) directory, e.g. the
-[git filter](plugins/git.py) and the [Nemo opener](plugins/nemo.py).
+#!/bin/sh
+echo "$@"
+code -n "$@"
+```
 
 ## Profiles
 

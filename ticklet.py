@@ -19,8 +19,6 @@
 
 __version__ = '0.0.0~unknown'
 
-LIBDIR = '.'
-
 import argparse
 import collections
 import fileinput
@@ -88,13 +86,9 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         return self.__class__(self.id, target_path)
 
     def open(self):
-        files = set(), {self.path}
         n = Notes.read(self)
-        if n:
-            files = {n.path} | set(n.files)
-            dirs = {os.path.dirname(filename) for filename in files}
-        files, dirs = plugins.run_filters(files, dirs)
-        plugins.run_openers(sorted(files), sorted(dirs))
+        files = {n.path} | set(n.files) if n else {self.path}
+        open_files(files)
 
 
 class Notes(collections.namedtuple('Notes', 'path summary status files')):
@@ -180,59 +174,27 @@ class Config:
         merge_dicts(self.config_values, changed_values)
 
 
-class PluginNotFound(Exception):
-    pass
-
-
-class Plugins:
-
-    search_dirs = ['plugins', LIBDIR + '/ticklet/plugins']
-
-    def __init__(self):
-        self.plugins = {}
-
-    def __getitem__(self, key):
-        if key not in self.plugins:
-            self.plugins[key] = self._load(key)
-        return self.plugins[key]
-
-    def _load(self, plugin):
-        for d in Plugins.search_dirs:
-            try:
-                return self._load_file(plugin, '{}/{}.py'.format(d, plugin))
-            except (FileNotFoundError, ImportError):
-                pass
-        raise PluginNotFound(plugin)
-
-    def _load_file(self, plugin, path):
+def open_files(files):
+    opener_dir = os.path.join(config_dir, 'open')
+    try:
+        openers = [
+            f for f in os.scandir(opener_dir)
+            if f.is_file() and os.access(f.path, os.X_OK)
+        ]
+    except FileNotFoundError:
+        openers = []
+    if not openers:
+        print("You don't have any openers. To open tickets, "
+              "add some to your configuration directory ({})."
+              .format(opener_dir), file=sys.stderr)
+    for opener in sorted(openers, key=operator.attrgetter('name')):
         try:
-            import importlib.util
-            spec = importlib.util.spec_from_file_location(plugin, path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-        except (AttributeError, ImportError):
-            from importlib.machinery import SourceFileLoader
-            module = SourceFileLoader(plugin, path).load_module()
-        return module
-
-    def run_filters(self, files, dirs):
-        for p in config['plugins.files.filter']:
-            files, dirs = self[p].filter_files(files, dirs)
-        return files, dirs
-
-    def run_openers(self, files, dirs):
-        openers = config['plugins.files.open']
-        if not openers:
-            print("You don't have any openers enabled. To open tickets, "
-                  "add some to your configuration file ({})."
-                  .format(user_config_file), file=sys.stderr)
-        for p in openers:
-            self[p].open_files(files, dirs)
+            subprocess.run([opener.path] + list(files))
+        except Exception as e:
+            print(e, file=sys.stderr)
 
 
 # Initialize
-
-plugins = Plugins()
 
 config = Config({
     'directory': {
@@ -257,12 +219,6 @@ config = Config({
         ## Notes
 
         """),
-    'plugins': {
-        'files': {
-            'filter': [],
-            'open': [],
-        },
-    },
 })
 
 # Parse command-line arguments

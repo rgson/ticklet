@@ -13,7 +13,6 @@ mandir      := $(datarootdir)/man
 man1dir     := $(mandir)/man1
 man1ext     := .1
 
-plugins := $(shell find $(srcdir)/plugins/ -name '*.py' -printf '%f\n')
 outdir  := build
 
 has_git := $(shell which git >/dev/null && git rev-parse 2>/dev/null \
@@ -41,11 +40,7 @@ clean:
 	if which dh_clean >/dev/null && [ -d debian ]; then dh_clean; fi
 
 .PHONY: build
-build: $(outdir)/ticklet $(addprefix $(outdir)/plugins/, $(plugins))
-
-$(outdir)/plugins/%.py: $(srcdir)/plugins/%.py
-	@mkdir -p $(dir $@)
-	cp $< $@
+build: $(outdir)/ticklet
 
 $(outdir)/ticklet: $(srcdir)/ticklet.py
 	@mkdir -p $(dir $@)
@@ -72,16 +67,11 @@ $(outdir)/man/ticklet$(man1ext): $(outdir)/ticklet $(srcdir)/man/ticklet.h2m
 
 .PHONY: install
 install: $(DESTDIR)$(bindir)/ticklet \
-         $(addprefix $(DESTDIR)$(libdir)/ticklet/plugins/, $(plugins)) \
          $(DESTDIR)$(man1dir)/ticklet$(man1ext)
 
 $(DESTDIR)$(bindir)/ticklet: $(outdir)/ticklet
 	@mkdir -p $(dir $@)
 	install -m 0755 $^ $@
-
-$(DESTDIR)$(libdir)/ticklet/plugins/%.py: $(outdir)/plugins/%.py
-	@mkdir -p $(dir $@)
-	install -m 0644 $^ $@
 
 $(DESTDIR)$(man1dir)/%$(man1ext): $(outdir)/man/%$(man1ext)
 	@mkdir -p $(dir $@)
