@@ -80,7 +80,8 @@ sudo make install
 
 ## Configuration
 
-Some of `ticklet`'s behavior can be configured through `~/.config/ticklet`.
+Some of `ticklet`'s behavior can be configured through
+`~/.config/ticklet/config.yaml`.
 
 The list of active plugins is of particular interest to every `ticklet` user.
 It determines the actions taken when a ticket is opened. Due to users' wildly

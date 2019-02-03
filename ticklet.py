@@ -269,10 +269,10 @@ config = Config({
 
 # Load configuration
 
-user_config_file = '{}/ticklet'.format(
+user_config_dir = '{}/ticklet'.format(
     os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')))
 try:
-    with open(user_config_file) as f:
+    with open(os.path.join(user_config_dir, 'config.yaml')) as f:
         config.update(yaml.load(f))
 except FileNotFoundError:
     pass
