@@ -123,15 +123,6 @@ plugins:
       - nemo
       - gnome-terminal
       - vscode
-
-profiles:
-  read: # the profile's name
-    plugins:
-      files:
-        filter:
-          - notes_only
-        open:
-          - vscode
 ```
 
 ## Plugins
@@ -160,6 +151,11 @@ A few example plugins are included in the [plugins](plugins) directory, e.g. the
 ## Profiles
 
 Profiles allow configurations to be temporarily overridden using the
-`-p`/`--profile` option. Settings specified in a profile will temporarily
-override the corresponding settings as defined in the user's default
-configuration, while retaining the rest without change.
+`-p`/`--profile` option. Settings specified in a profile will be used instead of
+the settings defined in the user's default configuration.
+
+Each profile consists of a directory in `~/.config/ticklet/profiles`. For
+example, `~/.config/ticklet/profiles/read` defines a profile named *read*. This
+directory can then contain configuration files just like the main directory.
+When a profile is activated, all settings will be loaded from within the
+profile's directory instead.

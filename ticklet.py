@@ -263,19 +263,7 @@ config = Config({
             'open': [],
         },
     },
-    'profiles': {
-    },
 })
-
-# Load configuration
-
-user_config_dir = '{}/ticklet'.format(
-    os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')))
-try:
-    with open(os.path.join(user_config_dir, 'config.yaml')) as f:
-        config.update(yaml.load(f))
-except FileNotFoundError:
-    pass
 
 # Parse command-line arguments
 
@@ -304,14 +292,23 @@ for conflicts in conflicting_arguments:
         print('Conflicting options:', ', '.join(names), file=sys.stderr)
         sys.exit(1)
 
-# Load the requested config profile (if any)
+# Load configuration
+
+config_dir = os.path.join(
+    os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')),
+    'ticklet')
 
 if args.profile:
-    try:
-        config.update(config['profiles.' + args.profile])
-    except:
+    config_dir = os.path.join(config_dir, 'profiles', args.profile)
+    if not os.path.isdir(config_dir):
         print('Profile not found:', args.profile, file=sys.stderr)
         sys.exit(1)
+
+try:
+    with open(os.path.join(config_dir, 'config.yaml')) as f:
+        config.update(yaml.load(f))
+except FileNotFoundError:
+    pass
 
 # Ensure that the ticket directories exist
 
