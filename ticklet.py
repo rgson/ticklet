@@ -274,7 +274,9 @@ for directory in config['directory'].values():
 # Default to creating and opening tickets
 
 ignore_args = {'tickets', 'profile'}
-no_action = not any(v for k, v in args.__dict__.items() if k not in ignore_args)
+no_action = not any(v not in (None, False)
+                    for k, v in args.__dict__.items()
+                    if k not in ignore_args)
 args.create = no_action
 args.open |= no_action
 
