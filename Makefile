@@ -7,7 +7,6 @@ srcdir := .
 prefix      := /usr/local
 exec_prefix := $(prefix)
 bindir      := $(exec_prefix)/bin
-libdir      := $(exec_prefix)/lib
 datarootdir := $(prefix)/share
 mandir      := $(datarootdir)/man
 man1dir     := $(mandir)/man1
@@ -46,7 +45,6 @@ $(outdir)/ticklet: $(srcdir)/ticklet.py
 	@mkdir -p $(dir $@)
 	cp $^ $@
 	sed -i "s,^\(__version__ *= *\)'.*'$$,\1'$(version)'," $@
-	sed -i "s,^\(LIBDIR *= *\)'.*'$$,\1'$(libdir)'," $@
 	chmod +x $@
 
 .PHONY: test
