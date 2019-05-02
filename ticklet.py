@@ -88,6 +88,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
     def open(self):
         n = Notes.read(self)
         files = {n.path} | set(n.files) if n else {self.path}
+        files = {os.path.expanduser(f) for f in files}
         open_files(files)
 
 
