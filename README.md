@@ -92,12 +92,10 @@ help of plugins is thus essential for a major part of `ticklet`'s functionality.
 ```yaml
 # Example config
 ---
-directory:
-  active: /home/yourname/tickets/active
-  archive: /home/yourname/tickets/archive
+directory_active: /home/yourname/tickets/active
+directory_archive: /home/yourname/tickets/archive
 
-display:
-  grid: false
+display_grid: false
 
 template: |
   # Ticket {id}

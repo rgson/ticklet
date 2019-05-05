@@ -45,7 +45,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def find(cls, id, optional=False):
-        directories = (config['directory.active'], config['directory.archive'])
+        directories = (config['directory_active'], config['directory_archive'])
         paths = (cls._path(id, directory) for directory in directories)
         found = next((path for path in paths if os.path.exists(path)), None)
         if not found and not optional:
@@ -54,7 +54,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def create(cls, id):
-        path = cls._path(id, config['directory.active'])
+        path = cls._path(id, config['directory_active'])
         os.makedirs(path)
         ticket = cls(id=id, path=path)
         Notes.create(ticket)
@@ -65,9 +65,9 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def list(cls, include_archived=False):
-        yield from cls._list_tickets_in(config['directory.active'])
+        yield from cls._list_tickets_in(config['directory_active'])
         if include_archived:
-            yield from cls._list_tickets_in(config['directory.archive'])
+            yield from cls._list_tickets_in(config['directory_archive'])
 
     @classmethod
     def _list_tickets_in(cls, directory):
@@ -75,10 +75,10 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
             yield cls(id=d[len(directory)+1:-1], path=d[:-1])
 
     def archive(self):
-        return self._move_ticket(config['directory.archive'])
+        return self._move_ticket(config['directory_archive'])
 
     def unarchive(self):
-        return self._move_ticket(config['directory.active'])
+        return self._move_ticket(config['directory_active'])
 
     def _move_ticket(self, target_dir):
         target_path = Ticket._path(self.id, target_dir)
@@ -147,34 +147,6 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                 print(line, end='')
 
 
-class Config:
-
-    def __init__(self, config_values):
-        self.config_values = config_values
-
-    def __getitem__(self, key):
-        v = self.config_values
-        for part in key.split('.'):
-            v = v[part]
-        return v
-
-    def __setitem__(self, key, value):
-        v = self.config_values
-        parts = key.split('.')
-        for part in parts[:-1]:
-            v = v[part]
-        v[parts[-1]] = value
-
-    def update(self, changed_values):
-        def merge_dicts(a, b):
-            for k in b:
-                if k in a and isinstance(a[k], dict) and isinstance(b[k], dict):
-                    merge_dicts(a[k], b[k])
-                else:
-                    a[k] = b[k]
-        merge_dicts(self.config_values, changed_values)
-
-
 def open_files(files):
     opener_dir = os.path.join(config_dir, 'open')
     try:
@@ -197,14 +169,10 @@ def open_files(files):
 
 # Initialize
 
-config = Config({
-    'directory': {
-        'active': os.path.expanduser('~/tickets/active'),
-        'archive': os.path.expanduser('~/tickets/archive'),
-    },
-    'display': {
-        'grid': False,
-    },
+config = {
+    'directory_active': os.path.expanduser('~/tickets/active'),
+    'directory_archive': os.path.expanduser('~/tickets/archive'),
+    'display_grid': False,
     'template': textwrap.dedent("""\
         # Ticket {id}
 
@@ -220,7 +188,7 @@ config = Config({
         ## Notes
 
         """),
-})
+}
 
 # Parse command-line arguments
 
@@ -269,7 +237,7 @@ except FileNotFoundError:
 
 # Ensure that the ticket directories exist
 
-for directory in config['directory'].values():
+for directory in (config['directory_active'], config['directory_archive']):
     os.makedirs(directory, exist_ok=True)
 
 # Default to creating and opening tickets
@@ -292,7 +260,7 @@ if args.list or args.list_all:
     notes = (Notes.read(t) or Notes(['']*4) for t in tickets)
     max_width = shutil.get_terminal_size((0, 0)).columns - 1
     tbl = texttable.Texttable(max_width)
-    if not config['display.grid']:
+    if not config['display_grid']:
         tbl.set_deco(0)
     tbl.add_rows([[t.id, n.summary, n.status] for t, n in zip(tickets, notes)],
                  header=False)
