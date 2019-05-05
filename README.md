@@ -118,7 +118,7 @@ template: |
 
 Openers define what happens when a ticket is opened.
 
-An opener is an executable located in the `~/.config/ticklet/open` directory.
+An opener is an executable located in the `~/.config/ticklet/openers` directory.
 When a ticket is opened, all of the configured openers are executed in
 lexicographic order. The full list of files from the ticket's notes, including
 the notes file itself, is passed as arguments. It may then filter and open the
@@ -126,7 +126,7 @@ files in any way desired.
 
 Example:
 ```sh
-# ~/.config/ticklet/open/example.sh
+# ~/.config/ticklet/openers/example.sh
 
 #!/bin/sh
 echo "$@"

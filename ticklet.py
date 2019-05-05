@@ -104,7 +104,7 @@ class Config:
         return os.path.join(self.config_dir, 'config.yaml')
 
     def opener_dir(self):
-        return os.path.join(self.config_dir, 'open')
+        return os.path.join(self.config_dir, 'openers')
 
     def openers(self):
         try:
