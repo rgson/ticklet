@@ -36,6 +36,85 @@ import yaml
 class TicketNotFound(Exception):
     pass
 
+class ProfileNotFound(Exception):
+    pass
+
+class OpenerNotFound(Exception):
+    pass
+
+
+class Config:
+
+    default_config_dir = os.path.join(
+            os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')),
+            'ticklet')
+
+    default_config = {
+        'directory_active': os.path.expanduser('~/tickets/active'),
+        'directory_archive': os.path.expanduser('~/tickets/archive'),
+        'display_grid': False,
+        'template': textwrap.dedent("""\
+            # Ticket {id}
+
+            _Summary_:
+            _Status_ : New
+
+
+            ## Files
+
+            -
+
+
+            ## Notes
+
+            """),
+    }
+
+    def __init__(self, profile=None):
+        self.config_dir = self.default_config_dir
+        self.config = self.default_config.copy()
+        self.profile = None
+        if profile:
+            self.set_profile(profile)
+        self.load_config()
+
+    def __getattr__(self, key):
+        try:
+            return self.config[key]
+        except KeyError:
+            raise AttributeError
+
+    def load_config(self):
+        try:
+            with open(self.config_file()) as f:
+                self.config.update(yaml.load(f))
+        except FileNotFoundError:
+            pass
+
+    def set_profile(self, profile):
+        self.profile = profile
+        self.config_dir = self.profile_dir(profile)
+        if not os.path.isdir(self.config_dir):
+            raise ProfileNotFound(profile)
+
+    def profile_dir(self, profile):
+        return os.path.join(self.default_config_dir, 'profiles', profile)
+
+    def config_file(self):
+        return os.path.join(self.config_dir, 'config.yaml')
+
+    def opener_dir(self):
+        return os.path.join(self.config_dir, 'open')
+
+    def openers(self):
+        try:
+            return sorted([
+                f.path for f in os.scandir(self.opener_dir())
+                if f.is_file() and os.access(f.path, os.X_OK)
+            ])
+        except FileNotFoundError:
+            return []
+
 
 class Ticket(collections.namedtuple('Ticket', 'id path')):
 
@@ -45,7 +124,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def find(cls, id, optional=False):
-        directories = (config['directory_active'], config['directory_archive'])
+        directories = (config.directory_active, config.directory_archive)
         paths = (cls._path(id, directory) for directory in directories)
         found = next((path for path in paths if os.path.exists(path)), None)
         if not found and not optional:
@@ -54,7 +133,7 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def create(cls, id):
-        path = cls._path(id, config['directory_active'])
+        path = cls._path(id, config.directory_active)
         os.makedirs(path)
         ticket = cls(id=id, path=path)
         Notes.create(ticket)
@@ -65,9 +144,9 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def list(cls, include_archived=False):
-        yield from cls._list_tickets_in(config['directory_active'])
+        yield from cls._list_tickets_in(config.directory_active)
         if include_archived:
-            yield from cls._list_tickets_in(config['directory_archive'])
+            yield from cls._list_tickets_in(config.directory_archive)
 
     @classmethod
     def _list_tickets_in(cls, directory):
@@ -75,10 +154,10 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
             yield cls(id=d[len(directory)+1:-1], path=d[:-1])
 
     def archive(self):
-        return self._move_ticket(config['directory_archive'])
+        return self._move_ticket(config.directory_archive)
 
     def unarchive(self):
-        return self._move_ticket(config['directory_active'])
+        return self._move_ticket(config.directory_active)
 
     def _move_ticket(self, target_dir):
         target_path = Ticket._path(self.id, target_dir)
@@ -89,7 +168,11 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         n = Notes.read(self)
         files = {n.path} | set(n.files) if n else {self.path}
         files = {os.path.expanduser(f) for f in files}
-        open_files(files)
+        openers = config.openers()
+        if not openers:
+            raise OpenerNotFound()
+        for opener in openers:
+            subprocess.run([opener] + list(files))
 
 
 class Notes(collections.namedtuple('Notes', 'path summary status files')):
@@ -102,7 +185,7 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
     def create(cls, ticket):
         path = Notes._path(ticket)
         with open(path, 'w') as f:
-            print(config['template'].format(id=ticket.id), file=f)
+            print(config.template.format(id=ticket.id), file=f)
         return cls(path=path, summary='', status='New', files=[])
 
     @classmethod
@@ -147,49 +230,6 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                 print(line, end='')
 
 
-def open_files(files):
-    opener_dir = os.path.join(config_dir, 'open')
-    try:
-        openers = [
-            f for f in os.scandir(opener_dir)
-            if f.is_file() and os.access(f.path, os.X_OK)
-        ]
-    except FileNotFoundError:
-        openers = []
-    if not openers:
-        print("You don't have any openers. To open tickets, "
-              "add some to your configuration directory ({})."
-              .format(opener_dir), file=sys.stderr)
-    for opener in sorted(openers, key=operator.attrgetter('name')):
-        try:
-            subprocess.run([opener.path] + list(files))
-        except Exception as e:
-            print(e, file=sys.stderr)
-
-
-# Initialize
-
-config = {
-    'directory_active': os.path.expanduser('~/tickets/active'),
-    'directory_archive': os.path.expanduser('~/tickets/archive'),
-    'display_grid': False,
-    'template': textwrap.dedent("""\
-        # Ticket {id}
-
-        _Summary_:
-        _Status_ : New
-
-
-        ## Files
-
-        -
-
-
-        ## Notes
-
-        """),
-}
-
 # Parse command-line arguments
 
 parser = argparse.ArgumentParser('ticklet')
@@ -219,25 +259,15 @@ for conflicts in conflicting_arguments:
 
 # Load configuration
 
-config_dir = os.path.join(
-    os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config')),
-    'ticklet')
-
-if args.profile:
-    config_dir = os.path.join(config_dir, 'profiles', args.profile)
-    if not os.path.isdir(config_dir):
-        print('Profile not found:', args.profile, file=sys.stderr)
-        sys.exit(1)
-
 try:
-    with open(os.path.join(config_dir, 'config.yaml')) as f:
-        config.update(yaml.load(f))
-except FileNotFoundError:
-    pass
+    config = Config(profile=args.profile)
+except ProfileNotFound as e:
+    print('Profile not found:', e, file=sys.stderr)
+    sys.exit(1)
 
 # Ensure that the ticket directories exist
 
-for directory in (config['directory_active'], config['directory_archive']):
+for directory in (config.directory_active, config.directory_archive):
     os.makedirs(directory, exist_ok=True)
 
 # Default to creating and opening tickets
@@ -260,7 +290,7 @@ if args.list or args.list_all:
     notes = (Notes.read(t) or Notes(['']*4) for t in tickets)
     max_width = shutil.get_terminal_size((0, 0)).columns - 1
     tbl = texttable.Texttable(max_width)
-    if not config['display_grid']:
+    if not config.display_grid:
         tbl.set_deco(0)
     tbl.add_rows([[t.id, n.summary, n.status] for t, n in zip(tickets, notes)],
                  header=False)
@@ -296,7 +326,12 @@ else:
             t = Ticket.unarchive(t)
 
         if args.open:
-            Ticket.open(t)
+            try:
+                Ticket.open(t)
+            except OpenerNotFound:
+                print("You don't have any openers. To open tickets, "
+                      "add some to your configuration directory ({})."
+                      .format(config.opener_dir()), file=sys.stderr)
         elif args.delete:
             prompt = 'Are you sure you want to delete {}? (y/N): '.format(t.id)
             confirm = '-'
