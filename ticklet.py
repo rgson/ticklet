@@ -89,7 +89,10 @@ class Config:
             with open(self.config_file()) as f:
                 self.config.update(yaml.load(f))
         except FileNotFoundError:
-            pass
+            return
+        for key, value in self.config.items():
+            if key.startswith('directory_'):
+                self.config[key] = os.path.expanduser(value)
 
     def set_profile(self, profile):
         self.profile = profile
