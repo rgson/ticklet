@@ -287,6 +287,8 @@ if no_action and not args.tickets:
 if args.list or args.list_all:
     tickets = Ticket.list(include_archived=args.list_all)
     tickets = sorted(tickets, key=operator.attrgetter('id'))
+    if not tickets:
+        sys.exit(0)
     notes = (Notes.read(t) or Notes(['']*4) for t in tickets)
     max_width = shutil.get_terminal_size((0, 0)).columns - 1
     tbl = texttable.Texttable(max_width)
