@@ -115,6 +115,17 @@ class Config:
         except FileNotFoundError:
             return []
 
+    @classmethod
+    def touch_user_config(cls):
+        c = cls()
+        for directory in [c.config_dir, c.profile_dir(''), c.opener_dir()]:
+           os.makedirs(directory, exist_ok=True)
+        try:
+            with open(c.config_file(), 'x') as f:
+                pass
+        except FileExistsError:
+            pass
+
 
 class Ticket(collections.namedtuple('Ticket', 'id path')):
 
@@ -229,6 +240,10 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                     files_section = False
                 print(line, end='')
 
+
+# Initialize the user profile
+
+Config.touch_user_config()
 
 # Parse command-line arguments
 
