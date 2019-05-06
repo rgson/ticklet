@@ -251,17 +251,26 @@ Config.touch_user_config()
 # Parse command-line arguments
 
 parser = argparse.ArgumentParser('ticklet')
-parser.add_argument(       '--version'  , version=__version__              , action='version'           )
-parser.add_argument('-l' , '--list'     , help='list active tickets'       , action='store_true'        )
-parser.add_argument('-k' , '--list-all' , help='list all tickets'          , action='store_true'        )
-parser.add_argument('-a' , '--archive'  , help='move tickets to archive'   , action='store_true'        )
-parser.add_argument('-u' , '--unarchive', help='move tickets from archive' , action='store_true'        )
-parser.add_argument('-o' , '--open'     , help='open existing tickets only', action='store_true'        )
-parser.add_argument('-d' , '--delete'   , help='delete tickets'            , action='store_true'        )
-parser.add_argument('-s' , '--status'   , help='set the status'                                         )
-parser.add_argument('-m' , '--summary'  , help='set the summary'                                        )
-parser.add_argument('-p' , '--profile'  , help='use an alternative configurations profile'              )
-parser.add_argument('tickets'           , help='ticket(s) to act upon'     , nargs='*', metavar='TICKET')
+parser.add_argument(      '--version'  , version=__version__
+                                       , action='version')
+parser.add_argument('-l', '--list'     , help='list active tickets'
+                                       , action='store_true')
+parser.add_argument('-k', '--list-all' , help='list all tickets'
+                                       , action='store_true')
+parser.add_argument('-a', '--archive'  , help='move tickets to archive'
+                                       , action='store_true')
+parser.add_argument('-u', '--unarchive', help='move tickets from archive'
+                                       , action='store_true')
+parser.add_argument('-o', '--open'     , help='open existing tickets only'
+                                       , action='store_true')
+parser.add_argument('-d', '--delete'   , help='delete tickets'
+                                       , action='store_true')
+parser.add_argument('-s', '--status'   , help='set the status')
+parser.add_argument('-m', '--summary'  , help='set the summary')
+parser.add_argument('-p', '--profile'  , help='use an alternative configurations profile')
+parser.add_argument('tickets'          , help='ticket(s) to act upon'
+                                       , nargs='*'
+                                       , metavar='TICKET')
 args = parser.parse_args()
 
 conflicting_arguments = [
