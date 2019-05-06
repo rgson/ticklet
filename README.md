@@ -126,14 +126,7 @@ lexicographic order. The full list of files from the ticket's notes, including
 the notes file itself, is passed as arguments. It may then filter and open the
 files in any way desired.
 
-Example:
-```sh
-# ~/.config/ticklet/openers/example.sh
-
-#!/bin/sh
-echo "$@"
-code -n "$@"
-```
+Example openers are available in the `examples` directory.
 
 ## Profiles
 
