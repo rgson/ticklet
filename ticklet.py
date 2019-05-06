@@ -268,13 +268,15 @@ parser.add_argument('-l', '--list'     , help='list active tickets'
                                        , action='store_true')
 parser.add_argument('-k', '--list-all' , help='list all tickets'
                                        , action='store_true')
-parser.add_argument('-a', '--archive'  , help='move tickets to archive'
+group1 = parser.add_mutually_exclusive_group()
+group1.add_argument('-a', '--archive'  , help='move tickets to archive'
                                        , action='store_true')
-parser.add_argument('-u', '--unarchive', help='move tickets from archive'
+group1.add_argument('-u', '--unarchive', help='move tickets from archive'
                                        , action='store_true')
-parser.add_argument('-o', '--open'     , help='open existing tickets only'
+group2 = parser.add_mutually_exclusive_group()
+group2.add_argument('-o', '--open'     , help='open existing tickets only'
                                        , action='store_true')
-parser.add_argument('-d', '--delete'   , help='delete tickets'
+group2.add_argument('-d', '--delete'   , help='delete tickets'
                                        , action='store_true')
 parser.add_argument('-s', '--status'   , help='set the status')
 parser.add_argument('-m', '--summary'  , help='set the summary')
@@ -286,17 +288,6 @@ parser.add_argument('tickets'          , help='ticket(s) to act upon'
                                        , nargs='*'
                                        , metavar='TICKET')
 args = parser.parse_args()
-
-conflicting_arguments = [
-    {'-a/--archive': args.archive, '-u/--unarchive': args.unarchive},
-    {'-d/--delete' : args.delete , '-o/--open'     : args.open     },
-]
-
-for conflicts in conflicting_arguments:
-    if sum(conflicts.values()) > 1:
-        names = [k for k, v in conflicts.items() if v]
-        print('Conflicting options:', ', '.join(names), file=sys.stderr)
-        sys.exit(1)
 
 # Load configuration
 

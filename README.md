@@ -9,7 +9,7 @@ Usage instructions can be viewed at any time by running `ticklet -h`.
 The program also comes with an associated manual page (`man ticklet`).
 
 ```
-usage: ticklet [-h] [--version] [-l] [-k] [-a] [-u] [-o] [-d] [-s STATUS]
+usage: ticklet [-h] [--version] [-l] [-k] [-a | -u] [-o | -d] [-s STATUS]
                [-m SUMMARY] [-r FROM TO] [-p PROFILE]
                [TICKET [TICKET ...]]
 
