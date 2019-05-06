@@ -188,6 +188,12 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
         for opener in openers:
             subprocess.run([opener] + list(files))
 
+    def rename(self, new_id):
+        Notes.read(self).replace(self.id, new_id)
+        new_path = new_id.join(self.path.rsplit(self.id, 1))
+        shutil.move(self.path, new_path)
+        return self.__class__(id=new_id, path=new_path)
+
 
 class Notes(collections.namedtuple('Notes', 'path summary status files')):
 
@@ -243,6 +249,11 @@ class Notes(collections.namedtuple('Notes', 'path summary status files')):
                     files_section = False
                 print(line, end='')
 
+    def replace(self, old, new):
+        with fileinput.FileInput(self.path, inplace=True) as f:
+            for line in f:
+                print(line.replace(old, new), end='')
+
 
 # Initialize the user profile
 
@@ -267,6 +278,9 @@ parser.add_argument('-d', '--delete'   , help='delete tickets'
                                        , action='store_true')
 parser.add_argument('-s', '--status'   , help='set the status')
 parser.add_argument('-m', '--summary'  , help='set the summary')
+parser.add_argument('-r', '--rename'   , help='rename a ticket'
+                                       , nargs=2
+                                       , metavar=('FROM', 'TO'))
 parser.add_argument('-p', '--profile'  , help='use an alternative configurations profile')
 parser.add_argument('tickets'          , help='ticket(s) to act upon'
                                        , nargs='*'
@@ -324,6 +338,14 @@ if args.list or args.list_all:
     tbl.add_rows([[t.id, n.summary, n.status] for t, n in zip(tickets, notes)],
                  header=False)
     print(tbl.draw())
+
+elif args.rename:
+    old_id, new_id = args.rename
+    try:
+        Ticket.find(old_id).rename(new_id)
+    except TicketNotFound as e:
+        print('Ticket not found:', e, file=sys.stderr)
+        sys.exit(2)
 
 elif not args.tickets:
     print('No tickets specified for action', file=sys.stderr)

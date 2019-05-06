@@ -10,7 +10,7 @@ The program also comes with an associated manual page (`man ticklet`).
 
 ```
 usage: ticklet [-h] [--version] [-l] [-k] [-a] [-u] [-o] [-d] [-s STATUS]
-               [-m SUMMARY] [-p PROFILE]
+               [-m SUMMARY] [-r FROM TO] [-p PROFILE]
                [TICKET [TICKET ...]]
 
 positional arguments:
@@ -29,6 +29,8 @@ optional arguments:
                         set the status
   -m SUMMARY, --summary SUMMARY
                         set the summary
+  -r FROM TO, --rename FROM TO
+                        rename a ticket
   -p PROFILE, --profile PROFILE
                         use an alternative configurations profile
 ```
