@@ -42,6 +42,9 @@ class ProfileNotFound(Exception):
 class OpenerNotFound(Exception):
     pass
 
+class TicketConflict(Exception):
+    pass
+
 
 class Config:
 
@@ -189,6 +192,8 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
             subprocess.run([opener] + list(files))
 
     def rename(self, new_id):
+        if self.find(new_id, optional=True) is not None:
+            raise TicketConflict(new_id)
         Notes.read(self).replace(self.id, new_id)
         new_path = new_id.join(self.path.rsplit(self.id, 1))
         shutil.move(self.path, new_path)
@@ -337,6 +342,9 @@ elif args.rename:
     except TicketNotFound as e:
         print('Ticket not found:', e, file=sys.stderr)
         sys.exit(2)
+    except TicketConflict as e:
+        print('Ticket already exists:', e, file=sys.stderr)
+        sys.exit(3)
 
 elif not args.tickets:
     print('No tickets specified for action', file=sys.stderr)
