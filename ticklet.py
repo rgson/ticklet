@@ -150,6 +150,8 @@ class Ticket(collections.namedtuple('Ticket', 'id path')):
 
     @classmethod
     def create(cls, id):
+        if cls.find(id, optional=True) is not None:
+            raise TicketConflict(id)
         path = cls._path(id, config.directory_active)
         os.makedirs(path)
         ticket = cls(id=id, path=path)
