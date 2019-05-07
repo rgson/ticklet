@@ -49,11 +49,19 @@ $(outdir)/ticklet: $(srcdir)/ticklet.py
 
 .PHONY: test
 test: $(outdir)/ticklet
-	for test in tests/*; do ./$$test $^ || exit $$?; done
+	@for test in tests/*; do \
+		echo "========================================";\
+		echo "=== $$test";\
+		./$$test $^ || exit $$?;\
+	done
 
 .PHONY: test-src
 test-src:
-	for test in tests/*; do ./$$test || exit $$?; done
+	@for test in tests/*; do \
+		echo "========================================";\
+		echo "=== $$test";\
+		./$$test || exit $$?;\
+	done
 
 .PHONY: man
 man: $(outdir)/man/ticklet$(man1ext)
