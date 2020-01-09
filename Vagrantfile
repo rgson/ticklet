@@ -12,7 +12,7 @@ def setup
   <<~HEREDOC
     echo 'LC_ALL=en_US.UTF-8' >>/etc/default/locale
     cd /home/vagrant
-    apt install -y devscripts fakeroot equivs git-buildpackage
+    apt install -y devscripts fakeroot equivs
     mk-build-deps -i -t 'apt -y' ticklet/debian/control
   HEREDOC
 end
