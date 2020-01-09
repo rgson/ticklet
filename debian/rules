@@ -10,9 +10,4 @@ override_dh_auto_install:
 	dh_auto_install -- prefix=/usr
 
 override_dh_python3:
-	cp requirements.txt debian/requires.txt
-	dh_python3 --requires=debian/requires.txt
-
-override_dh_clean:
-	dh_clean
-	rm -f debian/requires.txt
+	dh_python3 --requires requirements.txt
