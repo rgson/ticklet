@@ -48,9 +48,9 @@ Alternatively, one can be built from source:
 
 ```sh
 # 1. Build the .deb package
-sudo apt install devscripts fakeroot equivs git-buildpackage
+sudo apt install devscripts fakeroot equivs
 mk-build-deps -i -s sudo debian/control
-make deb
+debuild -b -us -uc
 
 # 2. Install ticklet and its dependencies
 sudo apt install ../ticklet_*.deb
