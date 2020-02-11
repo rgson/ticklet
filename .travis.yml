@@ -8,7 +8,7 @@ python:
   - 3.5
   - 3.6
 
-script: make test
+script: make check
 
 jobs:
   include:
@@ -16,13 +16,13 @@ jobs:
     - stage: Debian
       install: >
         sudo apt-get install -yq --no-install-suggests --no-install-recommends
-        devscripts fakeroot equivs git-buildpackage &&
+        devscripts fakeroot equivs &&
         mk-build-deps -i -s sudo -t 'apt-get -yq' debian/control
       before_script: |
         git clean -df
         git reset --hard
       script: >
-        DEB_BUILD_OPTIONS=nocheck make deb &&
+        DEB_BUILD_OPTIONS=nocheck debuild -b -us -uc &&
         sudo apt install ../*.deb
       python: 3.4
       virtualenv:
