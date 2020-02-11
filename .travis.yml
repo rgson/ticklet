@@ -24,6 +24,7 @@ jobs:
       script: >
         DEB_BUILD_OPTIONS=nocheck debuild -b -us -uc &&
         sudo apt install ../*.deb
+        make installcheck prefix=/usr
       python: 3.4
       virtualenv:
         system_site_packages: true
