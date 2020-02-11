@@ -3,7 +3,6 @@ language: python
 sudo: enabled
 
 python:
-  - 3.4
   - 3.5
   - 3.6
 
@@ -24,7 +23,7 @@ jobs:
         DEB_BUILD_OPTIONS=nocheck debuild -b -us -uc &&
         sudo apt install ../*.deb
         make installcheck prefix=/usr
-      python: 3.4
+      python: 3.5
       virtualenv:
         system_site_packages: true
 
