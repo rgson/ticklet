@@ -90,7 +90,7 @@ class Config:
     def load_config(self):
         try:
             with open(self.config_file()) as f:
-                self.config.update(yaml.load(f) or {})
+                self.config.update(yaml.safe_load(f) or {})
         except FileNotFoundError:
             return
         for key, value in self.config.items():
