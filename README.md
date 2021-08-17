@@ -11,7 +11,7 @@ The program also comes with an associated manual page (`man ticklet`).
 ```
 usage: ticklet [-h] [--version] [-l] [-k] [-a | -u] [-o | -d] [-s STATUS]
                [-m SUMMARY] [-r FROM TO] [-p PROFILE]
-               [TICKET [TICKET ...]]
+               [TICKET ...]
 
 positional arguments:
   TICKET                ticket(s) to act upon
